@@ -1,15 +1,25 @@
-# Offshore LOLER Lift Plan
+# Offshore Lift Plan
 
-A fill-in lift plan app for offshore lifting operations, based on the LOLER Lift Plan and Hazard Identification form.
+Two tools for offshore lifting operations. They work on a phone or a computer.
 
-## What it does
+## Lift plan (`index.html`)
 - All lift plan sections (1.0 Details to 13.0 Sign-off) as a fill-in form
 - Automatic calculations: max lift weight with contingency, crane utilisation and safety margin, sling leg tension from angle or sling length/height, pass/fail against sling, lug and equipment SWL
-- BSP colour code (Yellow, Blue, Green, White, Purple) that changes all equipment at once
-- Sketches: insert a photo, draw and write on it with your finger, add notes/steps
+- Colour code (Yellow, Blue, Green, White, Purple) that changes all equipment at once
+- Sketches: insert a photo, convert it to a pencil sketch or line drawing, draw and write on it with your finger, add notes/steps
 - Risk assessment rating fills in from severity and likelihood
 - Print / save as PDF in a layout like the paper form
 - Work saves on your device as you type; Save file / Open file to keep each lift plan
 
-## How to use
-Open `index.html` in a browser, or use the GitHub Pages link once Pages is turned on (Settings → Pages → Deploy from branch → main / root).
+## Crane lift sketch (`sketch.html`)
+- Elevation drawing of an offshore pedestal lattice-boom crane, drawn from the numbers you type
+- Aux block (default SWL 10 t) and main block (default SWL 80 t); every crane value is editable
+- Save a crane profile for each vessel and pick it next time
+- Set the boom by radius or boom angle, or drag the load to change the radius
+- Load picture as original, line drawing or pencil sketch; drag labels; lifting gear labels with arrows
+- Live checks: crane utilisation, sling angle, tension per leg, sling SWL, two-blocking
+- Save PNG, or Add to lift plan (goes into section 9 Sketches)
+
+## Open it
+Turn on GitHub Pages (Settings → Pages → Deploy from a branch → main / root), then open
+https://hafizibrahim11.github.io/offshore-lift-plan/
