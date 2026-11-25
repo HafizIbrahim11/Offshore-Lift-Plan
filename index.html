@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LOLER Lift Plan</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
+<style>
+/* VOICE: plain, sturdy field form — reads like the paper lift plan, works with gloves-on thumbs
+   IDEA: the printed LOLER lift plan, section bars and all, that does its own sums
+   PICTURE: the live calculation panel — big utilisation figure and sling tension with pass/fail
+   COLOUR and TYPE: white sheet, charcoal section bars, hi-vis orange for action; Archivo
+   LAYOUT: one calm column of numbered sections, sticky section chips, sticky action bar */
+:root{color-scheme:light;--bg:#eef0f2;--sheet:#fff;--ink:#15191f;--mut:#5b6470;--line:#d5d9de;--bar:#222a35;--act:#e8501a;--ok:#13804a;--okb:#e3f4ea;--warn:#a86200;--warnb:#fff3db;--bad:#c4221f;--badb:#fde6e5}
+:root[data-theme=dark]{color-scheme:dark;--bg:#0f1318;--sheet:#1a2029;--ink:#eef1f4;--mut:#9aa4b0;--line:#323b47;--bar:#2c3746;--okb:#11301f;--warnb:#33270e;--badb:#3a1514}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){color-scheme:dark;--bg:#0f1318;--sheet:#1a2029;--ink:#eef1f4;--mut:#9aa4b0;--line:#323b47;--bar:#2c3746;--okb:#11301f;--warnb:#33270e;--badb:#3a1514}}
+*{box-sizing:border-box;min-width:0}
+html{scroll-padding-top:120px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Archivo,system-ui,-apple-system,sans-serif;overflow-x:clip;padding-bottom:40px}
+.top{position:sticky;top:0;z-index:20;background:var(--bar);color:#fff;padding:10px max(4vw,14px) 0}
+.top-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:space-between}
+.top h1{font-size:19px;font-weight:800;margin:0;line-height:1.15}
+.top small{display:block;font-size:13px;color:#b9c3cf;font-weight:400}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+.btn{font:600 14px Archivo,system-ui,sans-serif;min-height:40px;padding:8px 14px;border-radius:8px;border:1px solid transparent;cursor:pointer;background:#ffffff1f;color:#fff}
+.btn:focus-visible,.ibtn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--act);outline-offset:1px}
+.btn.pri{background:var(--act)}
+@media(max-width:600px){.top h1{font-size:17px}.top small{display:inline;margin-left:6px}.acts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));width:100%}.btn{min-height:38px;padding:6px 4px;font-size:13px}}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:10px 0;scrollbar-width:none}
+.chips a{flex:none;color:#dfe5ec;text-decoration:none;font-size:13px;padding:6px 11px;border-radius:99px;background:#ffffff14;white-space:nowrap}
+main{max-width:880px;margin:0 auto;padding:14px max(3vw,10px)}
+.sec{background:var(--sheet);border:1px solid var(--line);border-radius:10px;margin-bottom:14px;overflow:hidden}
+.sec>h2{margin:0;background:var(--bar);color:#fff;font-size:15px;font-weight:600;padding:10px 14px}
+.bd{padding:14px}
+.sub{font-size:13px;font-weight:600;color:var(--mut);margin:16px 0 8px}
+.sub:first-child{margin-top:0}
+.g2,.g3{display:grid;gap:10px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:600px){.g2,.g3{grid-template-columns:minmax(0,1fr)}}
+label.f{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--mut)}
+input[type=text],input[type=number],input[type=date],select,textarea{font:16px Archivo,system-ui,sans-serif;color:var(--ink);background:var(--sheet);border:1px solid var(--line);border-radius:7px;padding:9px 10px;width:100%;min-height:44px}
+textarea{resize:vertical;min-height:70px;line-height:1.4}
+.hint{font-size:13px;color:var(--mut);margin:6px 0 0}
+.calc{border:2px solid var(--bar);border-radius:10px;padding:14px;margin-top:14px}
+.calc h3{margin:0 0 4px;font-size:16px}
+.res{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+@media(max-width:600px){.res{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.res div{background:var(--bg);border-radius:8px;padding:10px}
+.res b{display:block;font-size:clamp(22px,5vw,30px);line-height:1.1;font-variant-numeric:tabular-nums;white-space:nowrap}
+.res span{font-size:13px;color:var(--mut)}
+.verdict{margin-top:10px;padding:10px 12px;border-radius:8px;font-weight:600;font-size:15px}
+.v-ok{background:var(--okb);color:var(--ok)}.v-warn{background:var(--warnb);color:var(--warn)}.v-bad{background:var(--badb);color:var(--bad)}.v-none{background:var(--bg);color:var(--mut);font-weight:400}
+.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;width:max-content;max-width:100%}
+.seg label{padding:9px 14px;font-size:14px;cursor:pointer;min-height:42px;display:flex;align-items:center}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label:has(input:checked){background:var(--bar);color:#fff}
+.cats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media(max-width:600px){.cats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.cats label{border:2px solid var(--line);border-radius:9px;padding:10px;cursor:pointer;font-size:14px;min-height:60px}
+.cats label small{display:block;color:var(--mut);font-size:13px}
+.cats input{position:absolute;opacity:0;pointer-events:none}
+.cats label:has(input:checked){border-color:var(--act);background:color-mix(in srgb,var(--act) 10%,transparent)}
+.cols{display:flex;gap:8px;flex-wrap:wrap}
+.cols label{cursor:pointer;display:flex;align-items:center;gap:8px;padding:8px 14px 8px 8px;border:2px solid var(--line);border-radius:99px;font-weight:600;font-size:14px;min-height:44px}
+.cols input{position:absolute;opacity:0;pointer-events:none}
+.cols label:has(input:checked){border-color:var(--ink)}
+.dot{width:24px;height:24px;border-radius:50%;border:1px solid #0003;flex:none;display:inline-block;vertical-align:middle}
+.ck{display:flex;gap:10px;align-items:flex-start;padding:6px 0}
+.ck input[type=checkbox]{width:22px;height:22px;flex:none;margin-top:10px;accent-color:var(--act)}
+.ck input[type=text]{flex:1}
+.row{border:1px solid var(--line);border-radius:9px;padding:10px;margin-bottom:8px;position:relative}
+.row.stage{background:var(--bg)}
+.rowh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:6px}
+.rowh b{font-size:13px;color:var(--mut)}
+.ibtns{display:flex;gap:4px}
+.ibtn{width:36px;height:36px;border-radius:7px;border:1px solid var(--line);background:var(--sheet);color:var(--ink);cursor:pointer;font-size:16px;line-height:1}
+.ibtn.del{color:var(--bad)}
+.rg{display:grid;gap:8px;grid-template-columns:repeat(6,minmax(0,1fr))}
+.rg .w6{grid-column:span 6}.rg .w3{grid-column:span 3}.rg .w2{grid-column:span 2}.rg .w1{grid-column:span 1}
+@media(max-width:600px){.rg .w3,.rg .w2{grid-column:span 6}.rg .w1{grid-column:span 3}}
+.addb{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.addb button{font:600 14px Archivo,system-ui,sans-serif;min-height:42px;padding:8px 14px;border-radius:8px;border:1px dashed var(--mut);background:transparent;color:var(--ink);cursor:pointer}
+.pill{display:inline-block;padding:4px 10px;border-radius:99px;font-weight:700;font-size:13px;white-space:nowrap}
+.r-L{background:#1d4fc4;color:#fff}.r-M{background:#e3c800;color:#1a1a00}.r-H{background:#d0201b;color:#fff}
+.tog{display:flex;gap:4px}
+.tog button{min-width:48px;min-height:38px;border-radius:7px;border:1px solid var(--line);background:var(--sheet);color:var(--ink);font:600 14px Archivo,system-ui,sans-serif;cursor:pointer}
+.tog button.on{background:var(--bar);color:#fff;border-color:var(--bar)}
+.ng{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:6px 12px;align-items:center;border-bottom:1px solid var(--line);padding:8px 0}
+.ng .h{font-size:12px;color:var(--mut);text-align:center}
+@media(max-width:600px){.ng{grid-template-columns:auto auto}.ng>:first-child{grid-column:span 2}}
+.img{border:2px dashed var(--line);border-radius:9px;min-height:170px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;background:var(--bg);color:var(--mut);font-size:14px;text-align:center;padding:10px;width:100%;font-family:inherit}
+.img img{max-width:100%;max-height:420px;border-radius:6px}
+.img.has{border-style:solid;background:var(--sheet)}
+.mx{border-collapse:collapse;font-size:13px;margin-top:6px}
+.mx td,.mx th{border:1px solid var(--line);padding:5px 8px;text-align:center}
+.scroll{overflow-x:auto}
+.toast{position:fixed;left:50%;bottom:20px;transform:translate(-50%,30px);opacity:0;background:var(--bar);color:#fff;padding:10px 16px;border-radius:9px;font-size:14px;transition:.25s;z-index:50;max-width:90vw;pointer-events:none}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.modal{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;z-index:60;padding:16px}
+.modal.on{display:flex}
+.modal>div{background:var(--sheet);border-radius:12px;padding:18px;max-width:380px;width:100%}
+.modal p{margin:0 0 14px}
+.modal .acts .btn{background:var(--bg);color:var(--ink)}.modal .acts .btn.pri{background:var(--act);color:#fff}
+#doc{display:none}
+.ed{position:fixed;inset:0;z-index:70;background:#2a2f36;display:none;flex-direction:column}.ed.on{display:flex}
+.edbar{display:flex;flex-wrap:wrap;gap:6px;padding:8px max(2vw,8px);background:var(--bar);align-items:center}
+.edbar .btn{min-height:40px;padding:6px 11px;font-size:14px}.edbar .btn.on{outline:3px solid #fff;outline-offset:-3px}
+.edbar .sp{flex:1}.pc{width:34px;height:34px;border-radius:50%;border:3px solid #ffffff55;cursor:pointer}.pc.on{border-color:#fff;box-shadow:0 0 0 2px var(--act)}
+.edwrap{flex:1;display:flex;align-items:center;justify-content:center;padding:8px;min-height:0}
+#cv{max-width:100%;max-height:100%;background:#fff;touch-action:none;box-shadow:0 4px 20px #0006;cursor:crosshair}
+.edtip{color:#cfd6de;font-size:13px;padding:0 10px 8px;text-align:center}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+@media print{body{background:#fff;padding:0}.top,main,.toast,.modal{display:none!important}#doc{display:block}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-row">
+    <h1>LOLER Lift Plan <small id="hdrSub">New plan</small></h1>
+    <div class="acts">
+      <button class="btn pri" id="bPdf">Print / PDF</button>
+      <button class="btn" id="bSave">Save file</button>
+      <button class="btn" id="bOpen">Open file</button>
+      <button class="btn" id="bNew">New</button>
+    </div>
+  </div>
+  <nav class="chips">
+    <a href="#s1">1 Details</a><a href="#s2">2 Description</a><a href="#s3">3 Category</a><a href="#s4">4 Load &amp; calc</a><a href="#s5">5 Pre-requisites</a><a href="#s5b">Personnel</a><a href="#s6">6 Task steps</a><a href="#s7">7 Additional</a><a href="#s8">8 Equipment</a><a href="#s9">9 Sketches</a><a href="#s10">10 Hazards</a><a href="#s11">11 Non-generic</a><a href="#s12">12 Risk</a><a href="#s13">13 Sign-off</a>
+  </nav>
+</header>
+
+<main>
+<section class="sec" id="s1"><h2>1.0 Details — to be completed by the competent person</h2><div class="bd">
+  <div class="g2">
+    <label class="f">Site / platform<input type="text" data-f="site" placeholder="Champion 7"></label>
+    <label class="f">Area / location<input type="text" data-f="area" placeholder="CPWA07 – Sump Deck"></label>
+    <label class="f">Lifting plan number<input type="text" data-f="lp_no" placeholder="Wood-WA7-LP-043"></label>
+    <label class="f">Permit number<input type="text" data-f="permit"></label>
+    <label class="f">Risk assessment number<input type="text" data-f="ra_no" placeholder="Wood-WA7-RA-043"></label>
+    <label class="f">Revision &amp; date<input type="text" data-f="rev" placeholder="Rev 01 / 11.01.2024"></label>
+    <label class="f">Author name<input type="text" data-f="author"></label>
+    <label class="f">Company<input type="text" data-f="company" placeholder="Company name (prints on the header)"></label>
+  </div>
+  <div class="sub">Vessel / crane data</div>
+  <div class="g2">
+    <label class="f">Vessel<input type="text" data-f="vessel"></label>
+    <label class="f">Crane boom length (m)<input type="text" data-f="boom"></label>
+    <label class="f">Hoist wire rope (no. of falls)<input type="text" data-f="falls"></label>
+    <label class="f">Max permissible wind speed<input type="text" data-f="wind"></label>
+    <label class="f">Max lift radius from/onto platform<input type="text" data-f="radius"></label>
+    <label class="f">Crane capacity at that radius (ton)<input type="number" inputmode="decimal" step="any" data-f="cap"></label>
+  </div>
+  <p class="hint">Max lift weight and crane utilisation fill in automatically from section 4.</p>
+  <div class="sub">Crane radius / load chart (optional)</div>
+  <div id="L-chart"></div>
+</div></section>
+
+<section class="sec" id="s2"><h2>2.0 Lifting operation — description</h2><div class="bd">
+  <label class="f">Description<textarea data-f="desc" rows="3" placeholder="Installation and removal of 15m offshore gangway using Go Aliya crane and portable certified rigging equipment."></textarea></label>
+</div></section>
+
+<section class="sec" id="s3"><h2>3.0 Lifting categorisation</h2><div class="bd">
+  <div class="cats">
+    <label><input type="radio" name="cat" data-f="cat" value="Routine – Simple">Simple<small>Routine</small></label>
+    <label><input type="radio" name="cat" data-f="cat" value="Non-Routine – Simple/Basic">Simple / Basic<small>Non-routine</small></label>
+    <label><input type="radio" name="cat" data-f="cat" value="Non-Routine – Complicated">Complicated<small>Non-routine</small></label>
+    <label><input type="radio" name="cat" data-f="cat" value="Non-Routine – Complex">Complex<small>Non-routine</small></label>
+  </div>
+  <div class="sub">Current colour code (refer to BSP chart)</div>
+  <div class="cols" id="colourPick"></div>
+  <p class="hint">Changing the colour here changes all equipment in section 8 to the same colour.</p>
+</div></section>
+
+<section class="sec" id="s4"><h2>4.0 Load weight &amp; calculations</h2><div class="bd">
+  <div class="g2">
+    <label class="f">Load name<input type="text" data-f="load_name" placeholder="Offshore gangway"></label>
+    <label class="f">Dimensions<input type="text" data-f="load_dim" placeholder="Length 15m"></label>
+    <label class="f">Load weight (ton)<input type="number" inputmode="decimal" step="any" data-f="load_wt" placeholder="1.9"></label>
+    <label class="f">Rigging weight (ton, optional)<input type="number" inputmode="decimal" step="any" data-f="rig_wt" placeholder="0"></label>
+    <label class="f">Contingency (%)<input type="number" inputmode="decimal" step="any" data-f="cont"></label>
+    <label class="f">Load SWL / notes<input type="text" data-f="load_swl" placeholder="SWL 500 kg (max. 2 persons only)"></label>
+  </div>
+  <p class="hint">Type kg ÷ 1000 to get ton (1,900 kg = 1.9 ton).</p>
+
+  <div class="calc">
+    <h3>Crane utilisation</h3>
+    <div class="hint" style="margin:0">(Load + rigging) × (1 + contingency) ÷ crane capacity</div>
+    <div class="res">
+      <div><span>Max lift weight</span><b id="o_total">—</b></div>
+      <div><span>Crane utilisation</span><b id="o_util">—</b></div>
+      <div><span>Safety margin</span><b id="o_margin">—</b></div>
+    </div>
+    <div class="verdict v-none" id="o_cv">Enter load weight and crane capacity.</div>
+  </div>
+
+  <div class="calc">
+    <h3>Sling leg tension</h3>
+    <div class="hint" style="margin:0">Max lift weight ÷ legs taking the load ÷ sin(sling angle from horizontal)</div>
+    <div class="g2" style="margin-top:10px">
+      <label class="f">Legs taking the load<input type="number" inputmode="numeric" data-f="legs"></label>
+      <div class="f" style="font-size:13px;color:var(--mut)">Sling angle by
+        <div class="seg"><label><input type="radio" name="am" data-f="amode" value="angle">Angle</label><label><input type="radio" name="am" data-f="amode" value="dims">Length &amp; height</label></div>
+      </div>
+    </div>
+    <div class="g2" style="margin-top:10px" id="angBox">
+      <label class="f">Angle from horizontal (°)<input type="number" inputmode="decimal" step="any" data-f="angle"></label>
+    </div>
+    <div class="g2" style="margin-top:10px" id="dimBox">
+      <label class="f">Sling leg length (m)<input type="number" inputmode="decimal" step="any" data-f="sl_len"></label>
+      <label class="f">Vertical height, hook to lifting point (m)<input type="number" inputmode="decimal" step="any" data-f="sl_h"></label>
+    </div>
+    <p class="hint">For 4-leg slings on a rigid load, assume only 2 legs take the load unless your procedure says otherwise.</p>
+    <div class="res">
+      <div><span>Sling angle</span><b id="o_ang">—</b></div>
+      <div><span>Angle factor</span><b id="o_fac">—</b></div>
+      <div><span>Tension per leg</span><b id="o_leg">—</b></div>
+    </div>
+    <div class="g2" style="margin-top:10px">
+      <label class="f">SWL of sling leg used (ton)<input type="number" inputmode="decimal" step="any" data-f="sling_swl" placeholder="3.3"></label>
+      <label class="f">SWL per lifting point / lug (ton)<input type="number" inputmode="decimal" step="any" data-f="lug_swl"></label>
+    </div>
+    <div class="verdict v-none" id="o_sv">Enter the sling SWL to check it.</div>
+    <div class="verdict v-none" id="o_lv" hidden></div>
+  </div>
+</div></section>
+
+<section class="sec" id="s5"><h2>5.0 Task pre-requisites</h2><div class="bd">
+  <div id="L-pre"></div>
+  <div class="sub">All lifting operations require the following to be considered</div>
+  <div id="L-cons"></div>
+  <div class="sub">Method(s) of communication</div>
+  <div class="cols">
+    <label class="ck" style="padding:0 6px"><input type="checkbox" data-f="c_radio" style="margin:0">Radio</label>
+    <label class="ck" style="padding:0 6px"><input type="checkbox" data-f="c_verbal" style="margin:0">Verbal</label>
+    <label class="ck" style="padding:0 6px"><input type="checkbox" data-f="c_hand" style="margin:0">Hand signals</label>
+  </div>
+</div></section>
+
+<section class="sec" id="s5b"><h2>Personnel required, roles &amp; competency</h2><div class="bd"><div id="L-pers"></div></div></section>
+
+<section class="sec" id="s6"><h2>6.0 Task details step by step</h2><div class="bd"><div id="L-steps"></div></div></section>
+
+<section class="sec" id="s7"><h2>7.0 Additional input</h2><div class="bd">
+  <div id="addq"></div>
+  <label class="f" style="margin-top:8px">Details<textarea data-f="add_notes" rows="2" placeholder="Unknown load factors, uncertified steel, transfer from crane to portable rigging, etc."></textarea></label>
+</div></section>
+
+<section class="sec" id="s8"><h2>8.0 Lifting equipment &amp; accessories (type and SWL)</h2><div class="bd">
+  <p class="hint" style="margin-top:0">Fill in "Load on item" to get a direct pass/fail against its SWL.</p>
+  <div id="L-equip"></div>
+</div></section>
+
+<section class="sec" id="s9"><h2>9.0 Lift drawing(s) / sketches</h2><div class="bd">
+  <p class="hint" style="margin-top:0">Insert a photo or picture, or draw and write your sketch by finger. You can also draw and write on top of a picture.</p>
+  <div id="L-sk"></div>
+</div></section>
+
+<section class="sec" id="s10"><h2>10.0 Generic hazards specific to lifting operations</h2><div class="bd"><div id="L-gen"></div></div></section>
+
+<section class="sec" id="s11"><h2>11.0 Non-generic hazards for this lift</h2><div class="bd">
+  <div id="L-ng"></div>
+  <div class="verdict v-bad" style="font-size:13px">Where applicable hazards cannot be eliminated by the method in the lift plan, a lifting-operation-specific risk assessment must be completed.</div>
+</div></section>
+
+<section class="sec" id="s12"><h2>12.0 Risk assessment</h2><div class="bd">
+  <div class="g2">
+    <label class="f">Task activity<input type="text" data-f="ra_task"></label>
+    <label class="f">Personnel involved<input type="text" data-f="ra_pers" placeholder="PIC, Deck foreman / Deck crew"></label>
+    <label class="f">Group affected<input type="text" data-f="ra_group" placeholder="Construction Team"></label>
+    <label class="f">Assessor name<input type="text" data-f="ra_assessor"></label>
+  </div>
+  <div class="sub">Risk matrix — rating fills in from severity and likelihood</div>
+  <div class="scroll"><table class="mx" id="mx"></table></div>
+  <p class="hint">Who may be harmed: P = People, A = Assets, E = Environment, R = Reputation. Likelihood: A never heard of in industry · B heard of in industry · C occurred in our company · D several times a year in company · E several times a year at location.</p>
+  <div class="sub">Task steps</div>
+  <div id="L-risk"></div>
+</div></section>
+
+<section class="sec" id="s13"><h2>13.0 Approval &amp; sign-off</h2><div class="bd">
+  <div id="L-sign"></div>
+  <label class="f" style="margin-top:8px">Remarks<textarea data-f="remarks" rows="2"></textarea></label>
+  <p class="hint">Signature lines are left blank on the printout for wet signatures.</p>
+</div></section>
+</main>
+
+<div class="ed" id="ed">
+  <div class="edbar">
+    <span class="pc on" data-pc="#d0201b" style="background:#d0201b" title="Red"></span><span class="pc" data-pc="#111111" style="background:#111" title="Black"></span><span class="pc" data-pc="#1e6fd9" style="background:#1e6fd9" title="Blue"></span><span class="pc" data-pc="#2ea44f" style="background:#2ea44f" title="Green"></span>
+    <button class="btn on" data-pw="1">Thin</button><button class="btn" data-pw="2">Thick</button>
+    <button class="btn" id="eText">T Text</button><button class="btn" id="eLine">／ Line</button>
+    <button class="btn" id="eUndo">↶ Undo</button><button class="btn" id="eClear">Clear</button>
+    <span class="sp"></span><button class="btn" id="eCancel">Cancel</button><button class="btn pri" id="eDone">Done</button>
+  </div>
+  <div class="edtip" id="eTip">Draw with your finger. Tap “T Text” then tap the sketch to write words.</div>
+  <div class="edwrap"><canvas id="cv"></canvas></div>
+</div>
+<div class="modal" id="tModal" style="z-index:80"><div><p>Type the text to place on the sketch</p><input type="text" id="tIn" placeholder="e.g. Wire sling Ø16mm × 8m (SWL 3.3t)"><div class="acts" style="justify-content:flex-end;margin-top:12px"><button class="btn" id="tNo">Cancel</button><button class="btn pri" id="tYes">Add text</button></div></div></div>
+<div id="doc"></div>
+<input type="file" id="fImg" accept="image/*" hidden>
+<input type="file" id="fJson" accept=".json,application/json" hidden>
+<div class="toast" id="toast"></div>
+<div class="modal" id="modal"><div><p id="mTxt"></p><div class="acts" style="justify-content:flex-end"><button class="btn" id="mNo">Cancel</button><button class="btn pri" id="mYes">OK</button></div></div></div>
+
+<script>
+{
+const COLOURS={Yellow:'#f6d32d',Blue:'#1e6fd9',Green:'#2ea44f',White:'#ffffff',Purple:'#7b3fbf'};
+const MX={1:'LLLLL',2:'LLLMM',3:'LLMMH',4:'LMMHH',5:'MMHHH'};
+const LK='ABCDE';
+const RNAME={L:'Low',M:'Medium',H:'High'};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num=v=>{const n=parseFloat(v);return isFinite(n)?n:NaN};
+const $=id=>document.getElementById(id);
+const fmt=(n,d=2)=>isFinite(n)?(+n.toFixed(d)).toString():'—';
+
+const step=(no,text,who)=>({t:'step',no,text,who});
+const stage=text=>({t:'stage',text});
+const DEF=()=>({
+f:{vessel:'M.V. GO Aliya',boom:'46 m (Auxiliary Block)',falls:'1-fall (Auxiliary Block)',wind:'10.0 knots / 1.0 m HS',radius:'44 m',cap:'10',cat:'Non-Routine – Complicated',colour:'Yellow',cont:'10',legs:'2',amode:'angle',angle:'60',c_radio:true,c_hand:true},
+chart:[{img:'',cap:'Crane radius / load chart'}],
+pre:[['Confirm all process isolations are in place',1],['Pre-check and inspect all equipment/load for potential dropped objects',1],['Availability of Permit-to-Work',1],['Signs and barriers placed around the work area, taking into consideration the potential for any risk',1],['Rigging team to walk the full work scope and identify all potential hazards before signing the lift plan and risk assessment',1],['Verification of weights (data/tag plate, shipping manifest, trial lift and crane load indication, or calculation)',1],['Erect scaffolding access platform as required',0],['Lifting lugs to be NDT and certified',1],['Final positioning of the rigging equipment to be decided by PIC Rigging Supervisor',1]].map(([text,on])=>({text,on:!!on})),
+cons:['Weight, size, shape and centre of gravity of load','Method of slinging/attaching/detaching the load','Availability of approved lifting points on load','Proximity hazards, obstructions, path of load','Conflicting tasks in area','Overturning/load integrity/need for tag lines','Number of personnel required for task','Environmental conditions including weather'].map(text=>({text,on:true})),
+pers:[['1','Deck Foreman (PIC)','Person in charge',''],['1','Banksman','Provide instructions to crane operator','Banksman VOC'],['3','Deck Crew / certified slinger','Attach crane loads',''],['1','Crane Operator','Operate crane on banksman instructions','Offshore Crane Operator'],['2','Rope Access Rigger','','']].map(([qty,role,duty,cert])=>({qty,role,duty,name:'',cert})),
+steps:[stage('Offshore (site) preparation'),
+step('Info','Ensure that the laydown area has sufficient space and deck loading to accommodate the lifted load and is clear from obstruction.','ALL'),
+step('Info','All lifting equipment used for lifting shall be inspected and certified with the correct colour code.','ALL'),
+step('Info','Prior to lift, lift plan and lifting permit must be available onsite. The copy of the approved lift plan must be attached to the lifting permit and kept onsite.','PIC / Deck Foreman'),
+step('Info','PIC / Deck Foreman shall review the approved lift plan and its risk assessment. Ensure they are still fit for purpose and there are no new hazards at the worksite.','PIC / Deck Foreman'),
+step('Info','Carry out site visit and hold a toolbox talk to identify all safety-critical information on the permit and lift plan. Discuss the 10 questions for a safe lift, individual roles and responsibilities, specific hazards and controls. Never place yourself under a suspended load or in the line of fire, taking into account vessel movement, pitch and roll and swinging load.','PIC / Deck Foreman, Banksman or work party'),
+step('Info','Any doubt during the operation or incident, immediately stop the job and report it to crane operator, PIC, Vessel Master, OCM (all incidents must be reported).','ALL'),
+step('Info','All loads shall be landed on suitable timber dunnage to protect slings and load from damage.','Deck Foreman / Deck Crew'),
+step('Info','Use rubber packing or sling protectors where necessary to prevent damage to the sling from sharp edges/corners. Always consider the ratio bend radius when performing choked or basket hitch around a load.','Deck Foreman / Deck Crew'),
+step('Info','Prior to the start of the task, crane operator and deck crew to establish radio communications, ensuring radios are adequately charged.','Crane Operator / Deck Crew'),
+stage('Stage 1: Pre-rigging'),step('1','',''),step('2',''),
+stage('Stage 2: Lifting operation'),step('1','',''),step('2','',''),
+stage('Final'),step('1','Remove rigging gear, return to the rigging loft and perform housekeeping.','All parties')],
+add:{tech:'',calc:'',scaff:'',struct:''},
+equip:[['Wire sling, Ø16mm × 8m length','3.3','6'],['Wire sling, Ø16mm × 5m length','3.3','3'],['Shackle ¾"','4.75','6'],['Shackle 1"','8.5','4'],['Shackle 1⅛"','9.5','3'],['Master link','10.7','5'],['Spreader bar','3','1'],['Tirfor c/w 20m wire','3.2','2'],['Lever block, HOL 6m','6','1']].map(([desc,swl,qty])=>({desc,swl,qty,load:'',colour:'Yellow',cert:''})),
+sk:[{img:'',cap:'Sketch 1: Lifting / rigging arrangement'},{img:'',cap:'Sketch 2: Installation sequence'},{img:'',cap:'Sketch 3: Final setup'}],
+gen:[['Failure of lifting equipment through overload','Dropped objects','Determine the weight of the load and use appropriately rated rigging equipment and accessories for the slinging method used. Equipment used in the lifting process to be rated 30% above maximum weight of the load.'],
+['Failure of lifting equipment through incorrect use','Dropped objects','All personnel using lifting equipment have to receive training, be assessed as competent and receive reassessment as per industry standards. Instructions for safe use of lifting equipment to be made available and the lift plan to be followed.'],
+['Failure of lifting equipment through damage or deterioration','Dropped objects','Only lifting equipment that has current certification and colour coding can be used. Portable lifting equipment is controlled through the rigging loft. Documented in-service inspections are undertaken on all lifting equipment. Pre-use checks are undertaken on all lifting equipment.'],
+['Incorrect positioning of lifting equipment','Dropped objects','To be positioned only by competent personnel. Details of the positioning to be included in the lift plan.'],
+['Swinging load','Struck by load','Environmental conditions to be considered. Use of tag lines. Hands-free tools to be discussed at toolbox talk. No touching of load until load is below waist height. Do not stand in line of fire.'],
+['Personnel enter danger zone','Struck by load','Effective barriers in place, discussed at toolbox talk. Be aware of adjacent worksites. Ensure load route is free of personnel before lifting commences.'],
+['Positioning, operating and removing lifting equipment at height','Fall from height','Client & company procedures to satisfy working at height regulations.'],
+['Manual handling','Muscular strain','Client & company procedures to satisfy manual handling regulations.'],
+['Undertaking lifting operations','Slips, trips, falls','Client & company housekeeping rules to be adhered to, inspection of worksite as detailed in toolbox talk, awareness of surroundings and available escape routes.']].map(([ev,hz,ctl])=>({ev,hz,ctl})),
+ng:['Unverified weight of load','Fragile load requiring additional protection during the lift or at lay down','Load has high centre of gravity or is unstable','Potential for loss of load integrity','Load is an awkward size or shape or has sharp edges','Load has no dedicated lifting points','There are no certified suspension points for the lifting equipment to be used for cross hauling from the crane','Lifting of chemicals','Restricted headroom or confined work area','Tag lines required, hands-free tools to be used','Potential communications difficulties','Lift path is over hazardous live process plant / materials','Lift path is in close proximity to permanent / temporary obstacles','Obstructions in pick up or lay down area','Lay down area not adequate in terms of size or load bearing ability','Lay down area not within operating limits / radius of lifting equipment','Non-essential personnel can potentially enter the area below the lifting operation','Designated safe areas are identified, ensuring ricochet and deflected hazards are considered and correctly managed','Other (specify):'].map(text=>({text,app:'',elim:''})),
+risk:[['Worksite environment','Pinch points, entrapment, line of fire','P','4','C','1. Identify hazards and highlight.\n2. Use of good spatial awareness.\n3. Be observant of each other.\n4. Do not stand in line of fire.','4','A'],
+['Worksite environment','Cuts from sharp edges','P','3','C','1. Personnel to use complete and correct PPE.\n2. Sharp edges to be protected.','3','B'],
+['Human factors','Lapse of concentration, mistake and fatigue/stress','P','4','B','1. Ensure all personnel are advised that there is no conflict between safety and schedule.\n2. Whenever a new member joins the team, a new toolbox talk should take place to give attention to individual roles and responsibilities.','4','A'],
+['Installation of rigging equipment','Dropped objects, fall from height, manual handling','PAR','3','C','1. Work restraint to be worn and working at height procedures followed.\n2. Use of ladder for access, three points of contact to be maintained.\n3. Two-man operation for installing equipment at height; scaffold protection, rope to be used if required.\n4. Barriers placed around work area.\n5. Correct manual handling technique to be used.\n6. Mechanical aids to be used where possible.\n7. Correct ergonomics and good spatial awareness.','3','A'],
+['Use of lifting equipment','Failure of rigging equipment','P','3','C','1. Only rigging equipment suitable for use in the horizontal position shall be used to pull/restrain loads horizontally.\n2. Extension bars are not permitted on lever hoists, where the handle itself is designed to take the maximum SWL of the equipment.','3','B'],
+['Crane lifting operation','Crane malfunction','A','3','C','1. Preventive maintenance and inspections as per manufacturer guidelines.\n2. Perform the crane trial lift according to its actual lift and ensure it does not exceed the crane limits.\n3. Before lifting activities, all team involved should be aware of the crane limitations and extend to where the lift can be conducted.','3','B'],
+['Crane lifting operation','Uncontrolled descent of load, unexpected movement of load, collision with adjacent plant and process','PA','4','B','1. Slinging arrangements stipulated in the lift plan drawing and positioning of slings to be predetermined by competent rigger due to load dimension and C.O.G.\n2. Ensure all crane operators are familiar with different crane capacity limits and do not perform the lift if it may reach the crane\'s maximum limits.\n3. Identify and highlight potential proximity hazards.\n4. Lookout / spotter to be present at elevations where there is potential for the crane rope / hook to come into contact with platform equipment.','4','A'],
+['Crane lifting operation','Trapping of personnel','PAR','4','B','1. Only lifting-competent personnel to be involved with the lifting operation; all involved to read and understand the lift plan and be clear of the load lift path.\n2. Body positioning to be considered at all times during the lifting operation to prevent getting trapped between load and existing fixed structures.','4','A'],
+['Crane lifting operation','Unexpected movement of load, collision with adjacent plant and process','PA','4','B','1. Dynamic risk assessment and situation awareness to be carried out during and in between lifting operations, especially if several lifting operations are done in the same location.\n2. Ensure that further hazards are not introduced due to space restrictions caused by the initial material positioned on the laydown area; loads have to be positioned further inboard.','4','B']].map(([task,hz,who,sev,like,ctl,rsev,rlike])=>({task,hz,who,sev,like,ctl,rsev,rlike})),
+sign:['Prepared by (competent person)','Reviewed by (PIC / Deck Foreman)','Approved by (Rigging Supervisor)','Marine Captain / Vessel Master','Crane Operator','HSE / Safety Officer'].map(role=>({role,name:'',date:''}))
+});
+
+let S=DEF();
+
+/* ---------- list renderers ---------- */
+const opts=(arr,v)=>arr.map(o=>`<option${o==v?' selected':''}>${esc(o)}</option>`).join('');
+const inp=(l,i,k,v,ph='',type='text')=>`<input type="${type}"${type=='number'?' inputmode="decimal" step="any"':''} data-l="${l}" data-i="${i}" data-k="${k}" value="${esc(v)}" placeholder="${esc(ph)}">`;
+const ta=(l,i,k,v,ph='')=>`<textarea data-l="${l}" data-i="${i}" data-k="${k}" rows="2" placeholder="${esc(ph)}">${esc(v)}</textarea>`;
+const fld=(cls,label,html)=>`<label class="f ${cls}">${label}${html}</label>`;
+const head=(l,i,title)=>`<div class="rowh"><b>${title}</b><div class="ibtns"><button class="ibtn" data-act="up" data-l="${l}" data-i="${i}" aria-label="Move up">↑</button><button class="ibtn" data-act="down" data-l="${l}" data-i="${i}" aria-label="Move down">↓</button><button class="ibtn del" data-act="del" data-l="${l}" data-i="${i}" aria-label="Delete">✕</button></div></div>`;
+const addBtns=list=>`<div class="addb">${list.map(([act,l,txt])=>`<button data-act="${act}" data-l="${l}">+ ${txt}</button>`).join('')}</div>`;
+const rating=(s,l)=>{const r=MX[+s]?.[LK.indexOf(l)];return r||''};
+const pill=r=>r?`<span class="pill r-${r}">${RNAME[r]}</span>`:'—';
+
+const R={
+check:l=>S[l].map((r,i)=>`<div class="ck"><input type="checkbox" data-l="${l}" data-i="${i}" data-k="on"${r.on?' checked':''} aria-label="Tick">${inp(l,i,'text',r.text)}<button class="ibtn del" data-act="del" data-l="${l}" data-i="${i}" aria-label="Delete" style="margin-top:4px">✕</button></div>`).join('')+addBtns([['add',l,'Add item']]),
+pers:()=>S.pers.map((r,i)=>`<div class="row">${head('pers',i,'Person '+(i+1))}<div class="rg">${fld('w1','Qty',inp('pers',i,'qty',r.qty,'1','number'))}${fld('w2','Role',inp('pers',i,'role',r.role))}${fld('w3','Duty',inp('pers',i,'duty',r.duty))}${fld('w3','Name(s)',inp('pers',i,'name',r.name))}${fld('w3','Competency / cert.',inp('pers',i,'cert',r.cert))}</div></div>`).join('')+addBtns([['add','pers','Add person']]),
+steps:()=>S.steps.map((r,i)=>r.t=='stage'
+ ?`<div class="row stage">${head('steps',i,'Stage heading')}${inp('steps',i,'text',r.text,'Stage name')}</div>`
+ :`<div class="row">${head('steps',i,'Step')}<div class="rg">${fld('w1','Step',inp('steps',i,'no',r.no))}${fld('w3','Responsibility',inp('steps',i,'who',r.who))}${fld('w6','Action / description',ta('steps',i,'text',r.text,'Describe the step… Refer to Sketch 1'))}</div></div>`).join('')+addBtns([['addstep','steps','Add step'],['addstage','steps','Add stage heading']]),
+equip:()=>S.equip.map((r,i)=>`<div class="row">${head('equip',i,'Item '+(i+1))}<div class="rg">${fld('w6','Description',inp('equip',i,'desc',r.desc))}${fld('w1','SWL (ton)',inp('equip',i,'swl',r.swl,'','number'))}${fld('w1','Qty',inp('equip',i,'qty',r.qty,'','number'))}${fld('w1','Load on item (t)',inp('equip',i,'load',r.load,'optional','number'))}${fld('w1','Colour',`<select data-l="equip" data-i="${i}" data-k="colour">${opts(Object.keys(COLOURS),r.colour)}</select>`)}${fld('w2','Cert. no. / remarks',inp('equip',i,'cert',r.cert))}<div class="w6" data-calc="equip" data-i="${i}"></div></div></div>`).join('')+addBtns([['add','equip','Add equipment']]),
+img:l=>S[l].map((r,i)=>`<div class="row">${l=='sk'?head('sk',i,'Sketch '+(i+1)):''}<button class="img${r.img?' has':''}" data-act="${r.img?'draw':'pick'}" data-l="${l}" data-i="${i}">${r.img?`<img src="${r.img}" alt="${esc(r.cap)}">`:'<b style="font-size:28px">＋</b>Tap to insert picture'}</button><div class="addb"><button data-act="pick" data-l="${l}" data-i="${i}">${r.img?'Replace picture':'Insert picture'}</button><button data-act="draw" data-l="${l}" data-i="${i}">✎ ${r.img?'Draw / write on it':'Draw / write sketch'}</button>${r.img?`<button data-act="clrimg" data-l="${l}" data-i="${i}">Remove</button>`:''}</div><label class="f" style="margin-top:8px">Caption${inp(l,i,'cap',r.cap)}</label>${l=='sk'?`<label class="f" style="margin-top:8px">Notes / steps${ta(l,i,'note',r.note||'','STEP 1: 1) Set up rigging arrangement… 2) …')}</label>`:''}</div>`).join('')+(l=='sk'?addBtns([['addsk','sk','Add sketch']]):''),
+gen:()=>S.gen.map((r,i)=>`<div class="row">${head('gen',i,'Hazard '+(i+1))}<div class="rg">${fld('w3','Event',inp('gen',i,'ev',r.ev))}${fld('w3','Hazard',inp('gen',i,'hz',r.hz))}${fld('w6','Control measures',ta('gen',i,'ctl',r.ctl))}</div></div>`).join('')+addBtns([['add','gen','Add hazard']]),
+ng:()=>S.ng.map((r,i)=>`<div class="ng"><div>${i==S.ng.length-1&&/^Other/.test(r.text)?inp('ng',i,'text',r.text):esc(r.text)}</div>${['app','elim'].map(k=>`<div><div class="h">${k=='app'?'Applicable':'Eliminated'}</div><div class="tog">${['Y','N'].map(v=>`<button data-act="tog" data-l="ng" data-i="${i}" data-k="${k}" data-v="${v}" class="${r[k]==v?'on':''}">${v=='Y'?'Yes':'No'}</button>`).join('')}</div></div>`).join('')}</div>`).join(''),
+risk:()=>S.risk.map((r,i)=>`<div class="row">${head('risk',i,'No. '+(i+1))}<div class="rg">${fld('w3','Task step',inp('risk',i,'task',r.task))}${fld('w3','Hazard / effect',inp('risk',i,'hz',r.hz))}${fld('w2','Who may be harmed',inp('risk',i,'who',r.who,'P / A / E / R'))}${fld('w1','Severity',`<select data-l="risk" data-i="${i}" data-k="sev">${opts(['1','2','3','4','5'],r.sev)}</select>`)}${fld('w1','Likelihood',`<select data-l="risk" data-i="${i}" data-k="like">${opts([...LK],r.like)}</select>`)}<div class="f w2" style="font-size:13px;color:var(--mut)">Initial risk<div data-calc="ri" data-i="${i}" style="padding-top:8px"></div></div>${fld('w6','Control / recovery measures',ta('risk',i,'ctl',r.ctl))}${fld('w1','Resid. severity',`<select data-l="risk" data-i="${i}" data-k="rsev">${opts(['1','2','3','4','5'],r.rsev)}</select>`)}${fld('w1','Resid. likelihood',`<select data-l="risk" data-i="${i}" data-k="rlike">${opts([...LK],r.rlike)}</select>`)}<div class="f w2" style="font-size:13px;color:var(--mut)">Residual risk<div data-calc="rr" data-i="${i}" style="padding-top:8px"></div></div></div></div>`).join('')+addBtns([['add','risk','Add risk row']]),
+sign:()=>S.sign.map((r,i)=>`<div class="row">${head('sign',i,'Sign-off '+(i+1))}<div class="rg">${fld('w2','Role',inp('sign',i,'role',r.role))}${fld('w2','Name',inp('sign',i,'name',r.name))}${fld('w2','Date',inp('sign',i,'date',r.date,'','date'))}</div></div>`).join('')+addBtns([['add','sign','Add sign-off']])
+};
+const TARGET={pre:['L-pre',()=>R.check('pre')],cons:['L-cons',()=>R.check('cons')],pers:['L-pers',R.pers],steps:['L-steps',R.steps],equip:['L-equip',R.equip],chart:['L-chart',()=>R.img('chart')],sk:['L-sk',()=>R.img('sk')],gen:['L-gen',R.gen],ng:['L-ng',R.ng],risk:['L-risk',R.risk],sign:['L-sign',R.sign]};
+const render=l=>{const [id,fn]=TARGET[l];$(id).innerHTML=fn();calc()};
+const BLANK={pre:()=>({text:'',on:true}),cons:()=>({text:'',on:true}),pers:()=>({qty:'1',role:'',duty:'',name:'',cert:''}),equip:()=>({desc:'',swl:'',qty:'',load:'',colour:S.f.colour||'Yellow',cert:''}),gen:()=>({ev:'',hz:'',ctl:''}),risk:()=>({task:'',hz:'',who:'P',sev:'3',like:'C',ctl:'',rsev:'3',rlike:'A'}),sign:()=>({role:'',name:'',date:''})};
+
+function renderStatic(){
+  $('colourPick').innerHTML=Object.entries(COLOURS).map(([n,c])=>`<label><input type="radio" name="colour" data-f="colour" value="${n}"><span class="dot" style="background:${c}"></span>${n}</label>`).join('');
+  $('addq').innerHTML=[['tech','Additional technical support required'],['calc','Rigging calculations'],['scaff','Scaffolding lift frames'],['struct','Structural information']].map(([k,t])=>`<div class="ng" style="grid-template-columns:minmax(0,1fr) auto"><div>${t}</div><div class="tog">${['Y','N'].map(v=>`<button data-act="addq" data-k="${k}" data-v="${v}" class="${S.add[k]==v?'on':''}">${v=='Y'?'Yes':'No'}</button>`).join('')}</div></div>`).join('');
+  $('mx').innerHTML=`<tr><th>Sev.</th>${[...LK].map(c=>`<th>${c}</th>`).join('')}</tr>`+[1,2,3,4,5].map(s=>`<tr><th>${s}</th>${[...MX[s]].map(r=>`<td class="r-${r}">${RNAME[r]}</td>`).join('')}</tr>`).join('');
+  document.querySelectorAll('[data-f]').forEach(el=>{const v=S.f[el.dataset.f];
+    if(el.type=='checkbox')el.checked=!!v;else if(el.type=='radio')el.checked=v==el.value;else el.value=v??''});
+}
+function renderAll(){renderStatic();Object.keys(TARGET).forEach(render)}
+
+/* ---------- calculations ---------- */
+const V=(el,cls,txt)=>{el.className='verdict '+cls;el.textContent=txt};
+function lift(){
+  const f=S.f,load=num(f.load_wt),rig=num(f.rig_wt)||0,cont=num(f.cont)||0,cap=num(f.cap);
+  const total=isFinite(load)?(load+rig)*(1+cont/100):NaN;
+  const util=total/cap*100;
+  let th=NaN;
+  if(f.amode=='dims'){const L=num(f.sl_len),H=num(f.sl_h);if(L>0&&H>0&&H<=L)th=Math.asin(H/L)*180/Math.PI}
+  else th=num(f.angle);
+  const fac=th>0&&th<=90?1/Math.sin(th*Math.PI/180):NaN;
+  const legs=num(f.legs);
+  const leg=total/(legs>0?legs:NaN)*fac;
+  return{total,cap,util,margin:100-util,th,fac,leg,cont};
+}
+function calc(){
+  const c=lift(),f=S.f;
+  $('o_total').textContent=isFinite(c.total)?fmt(c.total,3)+' t':'—';
+  $('o_util').textContent=isFinite(c.util)?fmt(c.util,1)+'%':'—';
+  $('o_margin').textContent=isFinite(c.util)?fmt(c.margin,1)+'%':'—';
+  const cv=$('o_cv');
+  if(!isFinite(c.util))V(cv,'v-none','Enter load weight and crane capacity.');
+  else if(c.util>100)V(cv,'v-bad',`✕ Over crane capacity by ${fmt(c.total-c.cap,3)} t — do not lift.`);
+  else if(c.util>=80)V(cv,'v-warn',`! High utilisation (${fmt(c.util,1)}%) — check against your company lifting procedure.`);
+  else V(cv,'v-ok',`✓ Within crane capacity — ${fmt(c.util,1)}% utilisation, ${fmt(c.margin,1)}% margin.`);
+  $('angBox').hidden=f.amode=='dims';$('dimBox').hidden=f.amode!='dims';
+  $('o_ang').textContent=isFinite(c.th)?fmt(c.th,1)+'°':'—';
+  $('o_fac').textContent=isFinite(c.fac)?fmt(c.fac,3):'—';
+  $('o_leg').textContent=isFinite(c.leg)?fmt(c.leg,3)+' t':'—';
+  const sv=$('o_sv'),swl=num(f.sling_swl);
+  let angNote=c.th<30?' Angle below 30° — not recommended.':c.th<45?' Angle below 45° — high sling tension.':'';
+  if(!isFinite(c.leg))V(sv,'v-none','Enter load weight, legs and angle to get sling tension.');
+  else if(!isFinite(swl))V(sv,angNote?'v-warn':'v-none',`Each sling leg needs SWL of at least ${fmt(c.leg,3)} t.`+angNote);
+  else if(swl>=c.leg)V(sv,angNote?'v-warn':'v-ok',`✓ Sling OK — ${fmt(c.leg,3)} t on a ${fmt(swl)} t sling (${fmt(c.leg/swl*100,1)}% of SWL).`+angNote);
+  else V(sv,'v-bad',`✕ Sling too small — needs at least ${fmt(c.leg,3)} t, sling is ${fmt(swl)} t.`);
+  const lv=$('o_lv'),lug=num(f.lug_swl);
+  lv.hidden=!isFinite(lug)||!isFinite(c.leg);
+  if(!lv.hidden)lug>=c.leg?V(lv,'v-ok',`✓ Lifting point OK — ${fmt(c.leg,3)} t on ${fmt(lug)} t SWL (${fmt(c.leg/lug*100,1)}%).`):V(lv,'v-bad',`✕ Lifting point overloaded — ${fmt(c.leg,3)} t on ${fmt(lug)} t SWL.`);
+  document.querySelectorAll('[data-calc]').forEach(el=>{const i=+el.dataset.i,t=el.dataset.calc;
+    if(t=='equip'){const r=S.equip[i];if(!r)return;const s=num(r.swl),ld=num(r.load);
+      el.innerHTML=`<span class="dot" style="background:${COLOURS[r.colour]||'#ccc'};width:16px;height:16px"></span> `+(isFinite(s)&&isFinite(ld)?(ld<=s?`<b style="color:var(--ok)">✓ OK — ${fmt(ld/s*100,1)}% of SWL</b>`:`<b style="color:var(--bad)">✕ Overloaded — ${fmt(ld/s*100,1)}% of SWL</b>`):`<span class="hint">${esc(r.colour)} colour code</span>`)}
+    else{const r=S.risk[i];if(!r)return;el.innerHTML=t=='ri'?pill(rating(r.sev,r.like)):pill(rating(r.rsev,r.rlike))}});
+  $('hdrSub').textContent=[f.lp_no,f.load_name].filter(Boolean).join(' · ')||'New plan';
+}
+
+/* ---------- events ---------- */
+document.addEventListener('input',onEdit);document.addEventListener('change',onEdit);
+function onEdit(e){const el=e.target;
+  if(el.dataset.f){S.f[el.dataset.f]=el.type=='checkbox'?el.checked:el.value;if(el.dataset.f=='colour'){S.equip.forEach(r=>r.colour=el.value);render('equip');toast('All equipment changed to '+el.value)}}
+  else if(el.dataset.l&&el.dataset.k){const r=S[el.dataset.l][+el.dataset.i];if(!r)return;r[el.dataset.k]=el.type=='checkbox'?el.checked:el.value}
+  else return;
+  calc();queueSave();
+}
+const swap=(a,i,j)=>{if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]]};
+let pickT=null;
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;
+  const {act,l}=b.dataset,i=+b.dataset.i,a=S[l];
+  if(act=='del'){ask('Delete this row?',()=>{a.splice(i,1);render(l);queueSave()});return}
+  if(act=='up')swap(a,i,i-1);else if(act=='down')swap(a,i,i+1);
+  else if(act=='add')a.push(BLANK[l]());
+  else if(act=='addstep')a.push(step(String(a.length&&a[a.length-1].t=='step'&&!isNaN(+a[a.length-1].no)?+a[a.length-1].no+1:1),'',''));
+  else if(act=='addstage')a.push(stage(''));
+  else if(act=='addsk')a.push({img:'',cap:'Sketch '+(a.length+1)+': '});
+  else if(act=='allcol'){a.forEach(r=>r.colour=S.f.colour||'Yellow');toast('All equipment set to '+S.f.colour)}
+  else if(act=='tog'){a[i][b.dataset.k]=a[i][b.dataset.k]==b.dataset.v?'':b.dataset.v}
+  else if(act=='addq'){S.add[b.dataset.k]=S.add[b.dataset.k]==b.dataset.v?'':b.dataset.v;renderStatic();queueSave();return}
+  else if(act=='draw'){openEd(l,i);return}
+  else if(act=='pick'){pickT={l,i};$('fImg').value='';$('fImg').click();return}
+  else if(act=='clrimg'){a[i].img=''}
+  else return;
+  render(l);queueSave();
+});
+$('fImg').addEventListener('change',async e=>{const file=e.target.files[0];if(!file||!pickT)return;
+  try{const url=await shrink(file);S[pickT.l][pickT.i].img=url;render(pickT.l);queueSave();toast('Picture inserted')}catch(err){toast('Could not read that picture')}});
+function shrink(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onerror=rej;fr.onload=()=>{const im=new Image();im.onerror=rej;im.onload=()=>{
+  const max=1600,k=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);
+  const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',.82))};im.src=fr.result};fr.readAsDataURL(file)})}
+
+/* ---------- sketch editor ---------- */
+const cv=$('cv'),cx=cv.getContext('2d');
+const ED={l:null,i:0,base:null,ops:[],col:'#d0201b',pw:1,mode:'pen',cur:null,tp:null};
+const sc=()=>cv.width/900;
+function openEd(l,i){ED.l=l;ED.i=i;ED.ops=[];ED.mode='pen';ED.base=null;setMode('pen');
+  const src=S[l][i].img;
+  const go=()=>{redraw();$('ed').classList.add('on');document.body.style.overflow='hidden'};
+  if(src){const im=new Image();im.onload=()=>{ED.base=im;cv.width=im.width;cv.height=im.height;go()};im.src=src}
+  else{cv.width=1600;cv.height=1100;go()}}
+function closeEd(){$('ed').classList.remove('on');document.body.style.overflow=''}
+function drawOp(o){const k=sc();cx.strokeStyle=cx.fillStyle=o.c;cx.lineCap=cx.lineJoin='round';
+  if(o.t=='p'||o.t=='ln'){cx.lineWidth=(o.w==2?9:4)*k;cx.beginPath();o.p.forEach(([x,y],j)=>j?cx.lineTo(x,y):cx.moveTo(x,y));if(o.p.length==1)cx.lineTo(o.p[0][0]+.1,o.p[0][1]);cx.stroke()}
+  else if(o.t=='tx'){const fs=(o.w==2?46:30)*k;cx.font=`700 ${fs}px Arial,sans-serif`;cx.textBaseline='middle';cx.lineWidth=fs/6;cx.strokeStyle='#fff';cx.strokeText(o.s,o.x,o.y);cx.fillText(o.s,o.x,o.y)}}
+function redraw(){cx.fillStyle='#fff';cx.fillRect(0,0,cv.width,cv.height);if(ED.base)cx.drawImage(ED.base,0,0,cv.width,cv.height);ED.ops.forEach(drawOp)}
+const pos=e=>{const r=cv.getBoundingClientRect();return[(e.clientX-r.left)*cv.width/r.width,(e.clientY-r.top)*cv.height/r.height]};
+cv.addEventListener('pointerdown',e=>{e.preventDefault();const p=pos(e);
+  if(ED.mode=='text'){ED.tp=p;$('tIn').value='';$('tModal').classList.add('on');setTimeout(()=>$('tIn').focus(),50);return}
+  ED.cur={t:ED.mode=='line'?'ln':'p',c:ED.col,w:ED.pw,p:ED.mode=='line'?[p,p]:[p]};ED.ops.push(ED.cur);cv.setPointerCapture(e.pointerId);redraw()});
+cv.addEventListener('pointermove',e=>{if(!ED.cur)return;e.preventDefault();const p=pos(e);if(ED.cur.t=='ln')ED.cur.p[1]=p;else ED.cur.p.push(p);redraw()});
+const endStroke=()=>{ED.cur=null};cv.addEventListener('pointerup',endStroke);cv.addEventListener('pointercancel',endStroke);
+function setMode(m){ED.mode=m;$('eText').classList.toggle('on',m=='text');$('eLine').classList.toggle('on',m=='line');
+  $('eTip').textContent=m=='text'?'Tap on the sketch where the text should go.':m=='line'?'Drag to draw a straight line.':'Draw with your finger. Tap “T Text” then tap the sketch to write words.'}
+document.querySelectorAll('[data-pc]').forEach(b=>b.onclick=()=>{ED.col=b.dataset.pc;document.querySelectorAll('[data-pc]').forEach(x=>x.classList.toggle('on',x==b))});
+document.querySelectorAll('[data-pw]').forEach(b=>b.onclick=()=>{ED.pw=+b.dataset.pw;document.querySelectorAll('[data-pw]').forEach(x=>x.classList.toggle('on',x==b))});
+$('eText').onclick=()=>setMode(ED.mode=='text'?'pen':'text');
+$('eLine').onclick=()=>setMode(ED.mode=='line'?'pen':'line');
+$('eUndo').onclick=()=>{ED.ops.pop();redraw()};
+$('eClear').onclick=()=>{ED.ops=[];redraw()};
+$('eCancel').onclick=closeEd;
+$('eDone').onclick=()=>{const r=S[ED.l][ED.i];if(ED.ops.length||!r.img){r.img=cv.toDataURL('image/jpeg',.85)}closeEd();render(ED.l);queueSave();toast('Sketch saved')};
+const addText=()=>{const t=$('tIn').value.trim();$('tModal').classList.remove('on');if(t&&ED.tp){ED.ops.push({t:'tx',c:ED.col,w:ED.pw,s:t,x:ED.tp[0],y:ED.tp[1]});redraw()}};
+$('tYes').onclick=addText;$('tNo').onclick=()=>$('tModal').classList.remove('on');
+$('tIn').addEventListener('keydown',e=>{if(e.key=='Enter')addText()});
+
+/* ---------- UI helpers ---------- */
+let tt;function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2600)}
+let mOk=null;function ask(m,ok){$('mTxt').textContent=m;mOk=ok;$('modal').classList.add('on')}
+$('mNo').onclick=()=>$('modal').classList.remove('on');
+$('mYes').onclick=()=>{$('modal').classList.remove('on');mOk&&mOk()};
+
+/* ---------- storage on this device (IndexedDB) ---------- */
+const DB={open(){return new Promise((res,rej)=>{const r=indexedDB.open('liftplan',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=rej})},
+ async get(){const d=await this.open();return new Promise((res,rej)=>{const q=d.transaction('kv').objectStore('kv').get('cur');q.onsuccess=()=>res(q.result);q.onerror=rej})},
+ async put(v){const d=await this.open();return new Promise((res,rej)=>{const t=d.transaction('kv','readwrite');t.objectStore('kv').put(v,'cur');t.oncomplete=res;t.onerror=rej})}};
+let sv;function queueSave(){clearTimeout(sv);sv=setTimeout(()=>{try{DB.put(JSON.stringify(S)).catch(()=>{})}catch(e){}},500)}
+const merge=d=>{const b=DEF();return Object.assign(b,d,{f:Object.assign(b.f,d.f||{}),add:Object.assign(b.add,d.add||{})})};
+
+/* ---------- files ---------- */
+let dl=null;
+const fname=ext=>('LiftPlan_'+(S.f.lp_no||S.f.load_name||'draft')).replace(/[^\w.-]+/g,'_')+'.'+ext;
+async function saveData(name,data){
+  if(!dl&&window.claude?.use)dl=await window.claude.use('downloads').catch(()=>null);
+  if(!dl){try{const blob=data instanceof Blob?data:new Blob([data],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);toast('Saved '+name);return true}catch(e){toast('Could not save the file.');return false}}
+  try{await dl.save({filename:name,data});toast('Saved '+name);return true}
+  catch(err){const c=err?.code;toast(c=='declined'?'Save cancelled.':c=='host_unavailable'?'This app cannot save files — open the page in a browser.':'Could not save the file.');return false}
+}
+$('bSave').onclick=()=>saveData(fname('json'),JSON.stringify(S));
+$('bOpen').onclick=()=>{$('fJson').value='';$('fJson').click()};
+$('fJson').addEventListener('change',e=>{const file=e.target.files[0];if(!file)return;const fr=new FileReader();
+  fr.onload=()=>{try{S=merge(JSON.parse(fr.result));renderAll();queueSave();toast('Lift plan opened')}catch(err){toast('That file is not a lift plan.')}};fr.readAsText(file)});
+$('bNew').onclick=()=>ask('Start a new lift plan? Save a file first if you want to keep this one.',()=>{S=DEF();renderAll();queueSave();scrollTo(0,0);toast('New lift plan started')});
+
+/* ---------- printable document ---------- */
+const DOCCSS=`.d{font:10.5px/1.35 Arial,Helvetica,sans-serif;color:#000;background:#fff;width:100%}
+.d h1{font-size:16px;margin:0}.d .hd{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #000;padding-bottom:4px;margin-bottom:6px}
+.d .sh{background:#2b2b2b;color:#fff;font-weight:700;padding:4px 6px;margin-top:8px;font-size:11px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.d table{width:100%;border-collapse:collapse}.d td,.d th{border:1px solid #777;padding:3px 5px;vertical-align:top;text-align:left}
+.d th{background:#e6e6e6;-webkit-print-color-adjust:exact;print-color-adjust:exact}.d .k{width:28%;font-weight:700;background:#f3f3f3}
+.d .c{text-align:center}.d .stg td{background:#d9d9d9;font-weight:700}.d .pre{white-space:pre-wrap}
+.d .cb{font-family:Arial,sans-serif}.d img{max-width:100%;max-height:150mm;display:block;margin:4px auto}
+.d .sw{display:inline-block;width:10px;height:10px;border:1px solid #000;vertical-align:-1px;margin-right:3px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.d .L{background:#1d4fc4;color:#fff}.d .M{background:#e3c800}.d .H{background:#d0201b;color:#fff}.d .L,.d .M,.d .H{-webkit-print-color-adjust:exact;print-color-adjust:exact;font-weight:700;text-align:center}
+.d .avoid{break-inside:avoid;page-break-inside:avoid}.d tr{break-inside:avoid;page-break-inside:avoid}.d .sig{height:26px}
+@page{size:A4;margin:10mm 12mm}`;
+function buildDoc(){
+  const f=S.f,c=lift(),e=esc,B=v=>v?'☒':'☐';
+  const sw=n=>`<span class="sw" style="background:${COLOURS[n]||'#fff'}"></span>${e(n)}`;
+  const kv=rows=>`<table>${rows.map(r=>`<tr>${r.map((x,j)=>j%2?`<td>${e(x)}</td>`:`<td class="k">${e(x)}</td>`).join('')}</tr>`).join('')}</table>`;
+  const sh=t=>`<div class="sh">${t}</div>`;
+  const yn=v=>`Yes ${B(v=='Y')} No ${B(v=='N')}`;
+  let h=`<div class="d"><div class="hd"><div><h1>LOLER Lift Plan and Hazard Identification</h1><div>${e(f.company)}</div></div><div style="text-align:right">${e(f.lp_no)}<br>${e(f.rev)}</div></div>`;
+  h+=sh('1.0 Details — to be completed by the competent person')+kv([['Site / platform',f.site,'Area / location',f.area],['Lifting plan no.',f.lp_no,'Permit no.',f.permit],['Risk assessment no.',f.ra_no,'Revision & date',f.rev],['Author',f.author,'Company',f.company]]);
+  h+=`<div class="avoid">${sh('Vessel / crane data — '+e(f.vessel))}<table><tr><th>Description</th><th>Value</th></tr>${[['Crane boom length',f.boom],['Hoist wire rope (no. of falls)',f.falls],['Max permissible wind speed',f.wind],['Max lift radius from/onto platform',f.radius],['Crane capacity',f.cap?f.cap+' ton':''],['Max lift weight',isFinite(c.total)?`${fmt(c.total,3)} ton (incl. ${fmt(c.cont,1)}% contingency)`:''],['Crane utilisation / safety margin',isFinite(c.util)?`${fmt(c.util,1)}% / ${fmt(c.margin,1)}%`:'']].map(([a,b])=>`<tr><td class="k">${e(a)}</td><td>${e(b)}</td></tr>`).join('')}</table></div>`;
+  if(S.chart[0]?.img)h+=`<div class="avoid">${sh('Crane data / radius chart')}<img src="${S.chart[0].img}"><div class="c">${e(S.chart[0].cap)}</div></div>`;
+  h+=sh('2.0 Lifting operation — description')+`<table><tr><td class="pre">${e(f.desc)||'&nbsp;'}</td></tr></table>`;
+  h+=sh('3.0 Lifting categorisation')+`<table><tr>${['Routine – Simple','Non-Routine – Simple/Basic','Non-Routine – Complicated','Non-Routine – Complex'].map(x=>`<td>${B(f.cat==x)} ${e(x)}</td>`).join('')}</tr><tr><td colspan="4">Current colour code (BSP chart): <b>${sw(f.colour)}</b></td></tr></table>`;
+  h+=`<div class="avoid">${sh('4.0 Load weight & rigging calculation')}${kv([['Load',f.load_name,'Dimensions',f.load_dim],['Load weight',f.load_wt?f.load_wt+' ton':'','Rigging weight',f.rig_wt?f.rig_wt+' ton':''],['Contingency',f.cont+' %','Load SWL / notes',f.load_swl],['Max lift weight',isFinite(c.total)?fmt(c.total,3)+' ton':'','Crane utilisation',isFinite(c.util)?fmt(c.util,1)+'% (margin '+fmt(c.margin,1)+'%)':''],['Legs taking load',f.legs,'Sling angle (from horizontal)',isFinite(c.th)?fmt(c.th,1)+'° (factor '+fmt(c.fac,3)+')':''],['Tension per sling leg',isFinite(c.leg)?fmt(c.leg,3)+' ton':'','Sling SWL / lug SWL',[f.sling_swl&&f.sling_swl+' t',f.lug_swl&&f.lug_swl+' t'].filter(Boolean).join(' / ')]])}</div>`;
+  h+=sh('5.0 Task pre-requisites')+`<table>${S.pre.map(r=>`<tr><td style="width:18px" class="c">${B(r.on)}</td><td>${e(r.text)}</td></tr>`).join('')}</table>`;
+  h+=`<div class="avoid">${sh('All lifting operations require the following to be considered')}<table>${S.cons.reduce((a,r,i)=>(i%2?a[a.length-1].push(r):a.push([r]),a),[]).map(p=>`<tr>${p.map(r=>`<td>${B(r.on)} ${e(r.text)}</td>`).join('')}${p.length<2?'<td></td>':''}</tr>`).join('')}</table>
+  ${sh('Method(s) of communication')}<table><tr><td>${B(f.c_radio)} Radio</td><td>${B(f.c_verbal)} Verbal</td><td>${B(f.c_hand)} Hand signals</td></tr></table></div>`;
+  h+=sh('Number of personnel required, roles and competency (PIC)')+`<table><tr><th>Qty</th><th>Role</th><th>Duty</th><th>Name(s)</th><th>Competency</th></tr>${S.pers.map(r=>`<tr><td class="c">${e(r.qty)}</td><td>${e(r.role)}</td><td>${e(r.duty)}</td><td>${e(r.name)}</td><td>${e(r.cert)}</td></tr>`).join('')}</table>`;
+  h+=sh('6.0 Task details step by step')+`<table><tr><th style="width:40px">Step</th><th>Action</th><th style="width:28%">Individual responsibility</th></tr>${S.steps.map(r=>r.t=='stage'?`<tr class="stg"><td colspan="3">${e(r.text)}</td></tr>`:`<tr><td class="c">${e(r.no)}</td><td class="pre">${e(r.text)}</td><td>${e(r.who)}</td></tr>`).join('')}</table>`;
+  h+=`<div class="avoid">${sh('7.0 Additional input')}<table>${[['tech','Additional technical support required'],['calc','Rigging calculations'],['scaff','Scaffolding lift frames'],['struct','Structural information']].map(([k,t])=>`<tr><td>${t}</td><td style="width:90px">${yn(S.add[k])}</td></tr>`).join('')}${f.add_notes?`<tr><td colspan="2" class="pre">${e(f.add_notes)}</td></tr>`:''}</table></div>`;
+  h+=sh('8.0 Lifting equipment & accessories (type and SWL)')+`<table><tr><th>No</th><th>Description</th><th>SWL (t)</th><th>Qty</th><th>Load (t)</th><th>Colour</th><th>Cert. / remarks</th></tr>${S.equip.map((r,i)=>{const s=num(r.swl),ld=num(r.load);return`<tr><td class="c">${i+1}</td><td>${e(r.desc)}</td><td class="c">${e(r.swl)}</td><td class="c">${e(r.qty)}</td><td class="c">${isFinite(ld)?e(r.load)+(isFinite(s)?(ld<=s?' ✓':' ✕'):''):''}</td><td>${sw(r.colour)}</td><td>${e(r.cert)}</td></tr>`}).join('')}</table>`;
+  const sks=S.sk.filter(r=>r.img||r.note);
+  if(sks.length){h+=sh('9.0 Lift drawing(s) / sketches');sks.forEach(r=>{h+=`<div class="avoid" style="border:1px solid #777;margin-top:4px;padding:4px">${r.img?`<img src="${r.img}">`:''}<div class="c"><b>${e(r.cap)}</b></div>${r.note?`<div class="pre" style="margin-top:3px">${e(r.note)}</div>`:''}</div>`})}
+  h+=sh('10.0 Generic hazards specific to lifting operations')+`<table><tr><th>Event</th><th>Hazard</th><th>Control measures</th></tr>${S.gen.map(r=>`<tr><td style="width:24%">${e(r.ev)}</td><td style="width:16%">${e(r.hz)}</td><td>${e(r.ctl)}</td></tr>`).join('')}</table>`;
+  h+=sh('11.0 Non-generic hazards which may apply to the lifting operation')+`<table><tr><th>Hazard (consider all phases from pick up to lay down)</th><th class="c" colspan="2">Applicable</th><th class="c" colspan="2">Eliminated by method</th></tr><tr><th></th><th class="c">Yes</th><th class="c">No</th><th class="c">Yes</th><th class="c">No</th></tr>${S.ng.map(r=>`<tr><td>${e(r.text)}</td>${['app','elim'].map(k=>`<td class="c">${B(r[k]=='Y')}</td><td class="c">${B(r[k]=='N')}</td>`).join('')}</tr>`).join('')}<tr><td colspan="5" style="color:#c00;font-weight:700;text-align:center">Where applicable hazards cannot be eliminated by the method detailed in the lift plan, a lifting operations specific risk assessment must be completed.</td></tr></table>`;
+  h+=sh('12.0 Risk assessment')+kv([['RA number',f.ra_no,'Location',f.area],['Task activity',f.ra_task||f.desc,'Group affected',f.ra_group],['Personnel involved',f.ra_pers,'Date / rev',f.rev],['Assessor',f.ra_assessor,'','']]);
+  h+=`<table style="margin-top:4px"><tr><th>No</th><th>Task step</th><th>Hazard / effect</th><th>Who</th><th>S</th><th>L</th><th>Risk</th><th>Control / recovery measures</th><th>S</th><th>L</th><th>Residual</th></tr>${S.risk.map((r,i)=>{const a=rating(r.sev,r.like),b=rating(r.rsev,r.rlike);return`<tr><td class="c">${i+1}</td><td>${e(r.task)}</td><td>${e(r.hz)}</td><td class="c">${e(r.who)}</td><td class="c">${e(r.sev)}</td><td class="c">${e(r.like)}</td><td class="${a}">${RNAME[a]||''}</td><td class="pre">${e(r.ctl)}</td><td class="c">${e(r.rsev)}</td><td class="c">${e(r.rlike)}</td><td class="${b}">${RNAME[b]||''}</td></tr>`}).join('')}</table>`;
+  h+=`<div class="avoid">${sh('13.0 Approval & sign-off')}<table><tr><th>Role</th><th>Name</th><th>Signature</th><th>Date</th></tr>${S.sign.map(r=>`<tr><td>${e(r.role)}</td><td>${e(r.name)}</td><td class="sig"></td><td>${e(r.date)}</td></tr>`).join('')}</table>${f.remarks?`<table><tr><td class="pre"><b>Remarks:</b> ${e(f.remarks)}</td></tr></table>`:''}</div></div>`;
+  return h;
+}
+$('bPdf').onclick=async()=>{
+  const b=$('bPdf');
+  if(!window.claude?.use){$('doc').innerHTML=`<style>${DOCCSS}</style>`+buildDoc();setTimeout(()=>window.print(),100);return}
+  if(!window.html2pdf){toast('PDF tool still loading — try again in a moment.');return}
+  b.disabled=true;b.textContent='Making PDF…';
+  try{
+    const wrap=document.createElement('div');wrap.style.width='186mm';wrap.innerHTML=`<style>${DOCCSS}</style>`+buildDoc();
+    const name=fname('pdf');
+    const w=html2pdf().set({margin:[10,12,12,12],filename:name,image:{type:'jpeg',quality:.92},html2canvas:{scale:2,backgroundColor:'#fff',useCORS:true},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},pagebreak:{mode:['css','legacy'],avoid:['tr','.avoid']}}).from(wrap).toPdf();
+    const pdf=await w.get('pdf');const n=pdf.internal.getNumberOfPages();
+    for(let p=1;p<=n;p++){pdf.setPage(p);pdf.setFontSize(8);pdf.setTextColor(90);pdf.text(`${S.f.lp_no||'Lift plan'}   ·   Page ${p} of ${n}`,105,290,{align:'center'})}
+    const blob=pdf.output('blob');
+    await saveData(name,blob);
+  }catch(err){toast('Could not make the PDF.')}
+  b.disabled=false;b.textContent='Print / PDF';
+};
+window.addEventListener('beforeprint',()=>{$('doc').innerHTML=`<style>${DOCCSS}</style>`+buildDoc()});
+
+/* ---------- start ---------- */
+renderAll();
+(async()=>{try{const v=await DB.get();if(v){S=merge(JSON.parse(v));renderAll()}}catch(e){}})();
+}
+</script>
+</body>
+</html>
