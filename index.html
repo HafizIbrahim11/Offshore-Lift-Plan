@@ -542,9 +542,11 @@ let sv;function queueSave(){clearTimeout(sv);sv=setTimeout(()=>{try{DB.put(JSON.
 const merge=d=>{const b=DEF();return Object.assign(b,d,{f:Object.assign(b.f,d.f||{}),add:Object.assign(b.add,d.add||{})})};
 
 /* ---------- files ---------- */
+const toB64=d=>new Promise((res,rej)=>{if(typeof d=='string'){res(btoa(unescape(encodeURIComponent(d))));return}const fr=new FileReader();fr.onload=()=>res(String(fr.result).split(',')[1]);fr.onerror=rej;fr.readAsDataURL(d instanceof Blob?d:new Blob([d]))});
 let dl=null;
 const fname=ext=>('LiftPlan_'+(S.f.lp_no||S.f.load_name||'draft')).replace(/[^\w.-]+/g,'_')+'.'+ext;
 async function saveData(name,data){
+  if(window.Android){try{window.Android.saveFile(name,await toB64(data));return true}catch(e){toast('Could not save the file.');return false}}
   if(!dl&&window.claude?.use)dl=await window.claude.use('downloads').catch(()=>null);
   if(!dl){try{const blob=data instanceof Blob?data:new Blob([data],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);toast('Saved '+name);return true}catch(e){toast('Could not save the file.');return false}}
   try{await dl.save({filename:name,data});toast('Saved '+name);return true}
@@ -599,6 +601,7 @@ function buildDoc(){
 }
 $('bPdf').onclick=async()=>{
   const b=$('bPdf');
+  if(window.Android){$('doc').innerHTML=`<style>${DOCCSS}</style>`+buildDoc();setTimeout(()=>window.Android.print(),200);return}
   if(!window.claude?.use){$('doc').innerHTML=`<style>${DOCCSS}</style>`+buildDoc();setTimeout(()=>window.print(),100);return}
   if(!window.html2pdf){toast('PDF tool still loading — try again in a moment.');return}
   b.disabled=true;b.textContent='Making PDF…';

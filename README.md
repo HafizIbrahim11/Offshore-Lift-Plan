@@ -26,3 +26,12 @@ Two tools for offshore lifting operations. They work on a phone or a computer.
 ## Open it
 Turn on GitHub Pages (Settings → Pages → Deploy from a branch → main / root), then open
 https://hafizibrahim11.github.io/offshore-lift-plan/
+
+## Android app (APK)
+Every update builds an APK automatically (GitHub Actions). Download the latest from
+**Releases**: https://github.com/HafizIbrahim11/offshore-lift-plan/releases/latest
+
+Installing it adds two apps to the phone: **Lift Plan** and **Crane Sketch**. They work offline and share saved data.
+On first install, Android asks to allow installing from this source (Chrome / Files) — allow it once.
+
+The APK is signed with a private key kept in the repository secrets `ANDROID_KEYSTORE_BASE64` and `ANDROID_KEYSTORE_PASSWORD` (never in the code).

@@ -553,8 +553,10 @@ let tt;function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on'
 function png(){return new Promise((res,rej)=>{const svg=$('svg').cloneNode(true);svg.setAttribute('width',W);svg.setAttribute('height',DH+TB);
   const url='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(new XMLSerializer().serializeToString(svg));
   const im=new Image();im.onload=()=>{const k=1.5,cv=document.createElement('canvas');cv.width=W*k;cv.height=(DH+TB)*k;const x=cv.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,cv.width,cv.height);x.scale(k,k);x.drawImage(im,0,0);cv.toBlob(b=>b?res({blob:b,data:cv.toDataURL('image/jpeg',.9)}):rej(),'image/png')};im.onerror=rej;im.src=url})}
+const toB64=d=>new Promise((res,rej)=>{if(typeof d=='string'){res(btoa(unescape(encodeURIComponent(d))));return}const fr=new FileReader();fr.onload=()=>res(String(fr.result).split(',')[1]);fr.onerror=rej;fr.readAsDataURL(d instanceof Blob?d:new Blob([d]))});
 let dl=null;
 async function saveFile(name,blob){
+  if(window.Android){try{window.Android.saveFile(name,await toB64(blob))}catch(e){toast('Could not save the file.')}return}
   if(!dl&&window.claude?.use)dl=await window.claude.use('downloads').catch(()=>null);
   if(dl){try{await dl.save({filename:name,data:blob});toast('Saved '+name)}catch(err){toast(err?.code=='declined'?'Save cancelled.':'Could not save the file.')}return}
   const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);toast('Saved '+name)}

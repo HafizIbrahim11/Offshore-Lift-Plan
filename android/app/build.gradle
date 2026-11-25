@@ -1,0 +1,37 @@
+plugins { id 'com.android.application' }
+def run = System.getenv("GITHUB_RUN_NUMBER") ?: "1"
+android {
+  namespace 'com.hafiz.offshoreliftplan'
+  compileSdk 34
+  defaultConfig {
+    applicationId "com.hafiz.offshoreliftplan"
+    minSdk 26
+    targetSdk 34
+    versionCode Integer.parseInt(run)
+    versionName "1.0." + run
+  }
+  def ksPath = System.getenv("KEYSTORE_PATH")
+  def ksPass = System.getenv("KEYSTORE_PASSWORD")
+  def hasKey = ksPath && ksPass && file(ksPath).exists()
+  signingConfigs {
+    if (hasKey) {
+      release {
+        storeFile file(ksPath)
+        storePassword ksPass
+        keyAlias "liftplan"
+        keyPassword ksPass
+      }
+    }
+  }
+  buildTypes {
+    release {
+      minifyEnabled false
+      signingConfig hasKey ? signingConfigs.release : signingConfigs.debug
+    }
+  }
+  compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+}
+dependencies {
+  implementation 'androidx.webkit:webkit:1.11.0'
+  implementation 'androidx.core:core:1.13.1'
+}
