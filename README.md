@@ -12,7 +12,10 @@ Two tools for offshore lifting operations. They work on a phone or a computer.
 - Work saves on your device as you type; Save file / Open file to keep each lift plan
 
 ## Crane lift sketch (`sketch.html`)
-- Elevation drawing of an offshore pedestal lattice-boom crane, drawn from the numbers you type
+- Elevation drawing of a work barge with an offshore pedestal lattice-boom crane lifting onto a platform, drawn from the numbers you type
+- Crane controls: hold Boom ▲▼, Hoist ▲▼ and Slew ⟲⟳ to move the crane, or use the sliders
+- Load moment indicator: radius, boom angle, slew, load, rated capacity, utilisation, hook height, line pull per fall, sling tension
+- Load charts for aux and main block (radius → capacity), plan view with slew angle, wind and sea-state limits
 - Aux block (default SWL 10 t) and main block (default SWL 80 t); every crane value is editable
 - Save a crane profile for each vessel and pick it next time
 - Set the boom by radius or boom angle, or drag the load to change the radius

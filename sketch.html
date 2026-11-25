@@ -7,10 +7,10 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&display=swap">
 <style>
 /* VOICE: plain field tool, same family as the lift plan form
-   IDEA: the elevation drawing on a lift plan, drawn to scale from the numbers you type
-   PICTURE: the live crane elevation — pedestal crane, lattice boom, block, slings, load, radius
-   COLOUR and TYPE: white sheet, charcoal bars, hi-vis orange actions; Archivo
-   LAYOUT: drawing first (sticky on wide screens), controls in calm numbered panels */
+   IDEA: the crane cab — an elevation drawing you drive with boom, hoist and slew controls, read on an LMI screen
+   PICTURE: work barge with red/white lattice-boom pedestal crane lifting onto a multi-deck platform
+   COLOUR and TYPE: white sheet, charcoal bars, hi-vis orange actions, LMI in dark glass; Archivo
+   LAYOUT: drawing + controls together (sticky on wide screens), settings in numbered panels */
 :root{color-scheme:light;--bg:#eef0f2;--sheet:#fff;--ink:#15191f;--mut:#5b6470;--line:#d5d9de;--bar:#222a35;--act:#e8501a;--ok:#13804a;--okb:#e3f4ea;--warn:#a86200;--warnb:#fff3db;--bad:#c4221f;--badb:#fde6e5}
 :root[data-theme=dark]{color-scheme:dark;--bg:#0f1318;--sheet:#1a2029;--ink:#eef1f4;--mut:#9aa4b0;--line:#323b47;--bar:#2c3746;--okb:#11301f;--warnb:#33270e;--badb:#3a1514}
 @media(prefers-color-scheme:dark){:root:not([data-theme=light]){color-scheme:dark;--bg:#0f1318;--sheet:#1a2029;--ink:#eef1f4;--mut:#9aa4b0;--line:#323b47;--bar:#2c3746;--okb:#11301f;--warnb:#33270e;--badb:#3a1514}}
@@ -23,15 +23,32 @@ body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Archivo,system
 .btn{font:600 14px Archivo,system-ui,sans-serif;min-height:40px;padding:8px 13px;border-radius:8px;border:1px solid transparent;cursor:pointer;background:#ffffff1f;color:#fff}
 .btn.pri{background:var(--act)}
 @media(max-width:600px){.acts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%}.btn{padding:6px 4px;font-size:13px;min-height:38px}}
-.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:3px solid var(--act);outline-offset:1px}
-.wrap{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:14px;max-width:1400px;margin:0 auto;padding:14px max(2vw,10px)}
-@media(max-width:900px){.wrap{grid-template-columns:minmax(0,1fr)}}
-.board{position:sticky;top:76px;align-self:start}
-@media(max-width:900px){.board{position:static}}
+.btn:focus-visible,input:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid var(--act);outline-offset:1px}
+.wrap{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:14px;max-width:1440px;margin:0 auto;padding:14px max(2vw,10px)}
+@media(max-width:960px){.wrap{grid-template-columns:minmax(0,1fr)}}
+.board{position:sticky;top:70px;align-self:start}
+@media(max-width:960px){.board{position:static}}
 .paper{background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}
-#svg{display:block;width:100%;height:auto;touch-action:pan-y}
+#svg{display:block;width:100%;height:auto;touch-action:pan-y;user-select:none;-webkit-user-select:none}
 #svg [data-drag]{cursor:grab}
 .tip{font-size:13px;color:var(--mut);margin:6px 2px 0}
+.cab{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:10px;margin-top:10px}
+@media(max-width:600px){.cab{grid-template-columns:minmax(0,1fr)}}
+.lmi{background:#0d1a14;color:#b8f5c8;border-radius:10px;padding:10px 12px;font-variant-numeric:tabular-nums;border:3px solid #2b3a33}
+.lmi h3{margin:0 0 6px;font-size:12px;color:#7fc99a;font-weight:600}
+.lg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px 10px}
+.lg div span{display:block;font-size:11px;color:#7fc99a}
+.lg div b{font-size:19px;white-space:nowrap;color:#e6ffe9}
+.meter{height:16px;border-radius:4px;background:#1f3329;margin-top:8px;overflow:hidden;position:relative}
+.meter i{display:block;height:100%;background:#2fd06b;transition:width .15s}
+.meter em{position:absolute;top:0;bottom:0;width:2px;background:#ffd23f}
+.lmimsg{margin-top:6px;font-size:13px;font-weight:600}
+.joy{background:var(--sheet);border:1px solid var(--line);border-radius:10px;padding:10px}
+.jr{display:grid;grid-template-columns:52px minmax(0,1fr) 54px 54px;gap:6px;align-items:center;margin-bottom:8px}
+.jr b{font-size:13px}
+.jr input[type=range]{width:100%;accent-color:var(--act);min-height:36px}
+.hold{min-height:48px;border-radius:9px;border:1px solid var(--line);background:var(--bar);color:#fff;font:700 18px Archivo,system-ui,sans-serif;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+.hold:active{background:var(--act)}
 .sec{background:var(--sheet);border:1px solid var(--line);border-radius:10px;margin-bottom:12px;overflow:hidden}
 .sec>h2{margin:0;background:var(--bar);color:#fff;font-size:15px;font-weight:600;padding:9px 14px}
 .bd{padding:12px 14px}
@@ -39,18 +56,15 @@ body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Archivo,system
 label.f{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--mut)}
 input[type=text],input[type=number],input[type=date],select{font:16px Archivo,system-ui,sans-serif;color:var(--ink);background:var(--sheet);border:1px solid var(--line);border-radius:7px;padding:8px 10px;width:100%;min-height:44px}
 .seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:10px}
-.seg label{flex:1;text-align:center;padding:9px 8px;font-size:14px;cursor:pointer;min-height:42px}
+.seg label{flex:1;text-align:center;padding:9px 6px;font-size:14px;cursor:pointer;min-height:42px}
 .seg input{position:absolute;opacity:0;pointer-events:none}
 .seg label:has(input:checked){background:var(--bar);color:#fff}
 .sub{font-size:13px;font-weight:600;color:var(--mut);margin:12px 0 6px}
-.res{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.res div{background:var(--bg);border-radius:8px;padding:8px 10px}
-.res b{display:block;font-size:20px;line-height:1.15;white-space:nowrap;font-variant-numeric:tabular-nums}
-.res span{font-size:12px;color:var(--mut)}
 .verdict{margin-top:8px;padding:9px 12px;border-radius:8px;font-weight:600;font-size:14px}
 .v-ok{background:var(--okb);color:var(--ok)}.v-warn{background:var(--warnb);color:var(--warn)}.v-bad{background:var(--badb);color:var(--bad)}
-.gear{display:grid;grid-template-columns:minmax(0,1fr) 110px 40px;gap:6px;margin-bottom:6px}
-.ibtn{width:40px;height:44px;border-radius:7px;border:1px solid var(--line);background:var(--sheet);color:var(--bad);cursor:pointer;font-size:16px}
+.gear,.chr{display:grid;grid-template-columns:minmax(0,1fr) 120px 44px;gap:6px;margin-bottom:6px}
+.chr{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 44px}
+.ibtn{width:44px;height:44px;border-radius:7px;border:1px solid var(--line);background:var(--sheet);color:var(--bad);cursor:pointer;font-size:16px}
 .addb{font:600 14px Archivo,system-ui,sans-serif;min-height:42px;padding:8px 14px;border-radius:8px;border:1px dashed var(--mut);background:transparent;color:var(--ink);cursor:pointer;margin:4px 6px 0 0}
 .hint{font-size:13px;color:var(--mut);margin:6px 0 0}
 .toast{position:fixed;left:50%;bottom:20px;transform:translate(-50%,30px);opacity:0;background:var(--bar);color:#fff;padding:10px 16px;border-radius:9px;font-size:14px;transition:.25s;z-index:50;max-width:90vw;pointer-events:none}
@@ -62,7 +76,7 @@ input[type=text],input[type=number],input[type=date],select{font:16px Archivo,sy
 .modal .btn{background:var(--bg);color:var(--ink)}.modal .btn.pri{background:var(--act);color:#fff}
 .li{display:flex;gap:6px;align-items:center;border-bottom:1px solid var(--line);padding:8px 0}
 .li span{flex:1;overflow-wrap:anywhere}
-@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+@media (prefers-reduced-motion:reduce){.toast,.meter i{transition:none}}
 </style>
 </head>
 <body>
@@ -79,26 +93,36 @@ input[type=text],input[type=number],input[type=date],select{font:16px Archivo,sy
 
 <div class="wrap">
   <div class="board">
-    <div class="paper"><svg id="svg" viewBox="0 0 1600 1100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Crane lift elevation sketch"></svg></div>
-    <p class="tip">Drag the load left or right to change the radius. Drag any label to move it.</p>
+    <div class="paper"><svg id="svg" viewBox="0 0 1600 1060" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Crane lift elevation sketch"></svg></div>
+    <p class="tip">Hold the buttons to move the crane. Drag the load to change radius, drag the purple shackles to move the lifting points, drag any label to move it.</p>
+    <div class="cab">
+      <div class="lmi" aria-live="polite">
+        <h3>LOAD MOMENT INDICATOR</h3>
+        <div class="lg">
+          <div><span>Radius</span><b id="m_R">—</b></div>
+          <div><span>Boom angle</span><b id="m_A">—</b></div>
+          <div><span>Slew</span><b id="m_S">—</b></div>
+          <div><span>Load on hook</span><b id="m_W">—</b></div>
+          <div><span>Rated capacity</span><b id="m_C">—</b></div>
+          <div><span>Utilisation</span><b id="m_U">—</b></div>
+          <div><span>Hook height</span><b id="m_H">—</b></div>
+          <div><span>Line pull / fall</span><b id="m_P">—</b></div>
+          <div><span>Tension / leg</span><b id="m_T">—</b></div>
+        </div>
+        <div class="meter"><i id="m_bar"></i><em style="left:80%"></em></div>
+        <div class="lmimsg" id="m_msg"></div>
+      </div>
+      <div class="joy">
+        <div class="jr"><b>Boom</b><input type="range" id="j_boom" min="0" max="89" step="0.1" aria-label="Boom angle"><button class="hold" data-hold="boom+" aria-label="Boom up">▲</button><button class="hold" data-hold="boom-" aria-label="Boom down">▼</button></div>
+        <div class="jr"><b>Hoist</b><input type="range" id="j_hoist" min="0" max="30" step="0.1" aria-label="Lift height"><button class="hold" data-hold="hoist+" aria-label="Hoist up">▲</button><button class="hold" data-hold="hoist-" aria-label="Hoist down">▼</button></div>
+        <div class="jr"><b>Slew</b><input type="range" id="j_slew" min="0" max="359" step="1" aria-label="Slew angle"><button class="hold" data-hold="slew-" aria-label="Slew left">⟲</button><button class="hold" data-hold="slew+" aria-label="Slew right">⟳</button></div>
+        <p class="hint" style="margin:2px 0 0">Hoist = height of the load above the set-down deck. Slew 0° = bow, 90° = starboard.</p>
+      </div>
+    </div>
+    <div id="verdicts"></div>
   </div>
 
   <div>
-    <section class="sec"><h2>Result</h2><div class="bd">
-      <div class="res">
-        <div><span>Radius</span><b id="r_R">—</b></div>
-        <div><span>Boom angle</span><b id="r_A">—</b></div>
-        <div><span>Boom tip height</span><b id="r_T">—</b></div>
-        <div><span>Total lift weight</span><b id="r_W">—</b></div>
-        <div><span>Block capacity</span><b id="r_C">—</b></div>
-        <div><span>Utilisation</span><b id="r_U">—</b></div>
-        <div><span>Sling angle</span><b id="r_S">—</b></div>
-        <div><span>Tension per leg</span><b id="r_L">—</b></div>
-        <div><span>Hook below sheave</span><b id="r_H">—</b></div>
-      </div>
-      <div id="verdicts"></div>
-    </div></section>
-
     <section class="sec"><h2>1 · Drawing info</h2><div class="bd"><div class="g2">
       <label class="f">Sketch name<input type="text" data-k="name"></label>
       <label class="f">Platform / project<input type="text" data-k="tb.project"></label>
@@ -112,45 +136,61 @@ input[type=text],input[type=number],input[type=date],select{font:16px Archivo,sy
     <section class="sec"><h2>2 · Vessel &amp; crane</h2><div class="bd">
       <div class="g2">
         <label class="f">Saved vessel / crane<select id="prof"></select></label>
-        <div style="display:flex;gap:6px;align-items:flex-end"><button class="addb" id="pSave" style="margin:0">Save this crane</button><button class="addb" id="pDel" style="margin:0">Delete</button></div>
+        <div style="display:flex;gap:6px;align-items:flex-end;flex-wrap:wrap"><button class="addb" id="pSave" style="margin:0">Save this crane</button><button class="addb" id="pDel" style="margin:0">Delete</button></div>
       </div>
       <div class="g2" style="margin-top:10px">
         <label class="f">Vessel / installation<input type="text" data-k="c.vessel"></label>
         <label class="f">Crane type<input type="text" data-k="c.type"></label>
       </div>
-      <p class="hint">Every crane value below can be changed. Tap “Save this crane” to keep it for that vessel and pick it next time.</p>
+      <p class="hint">Every value can be changed. Tap “Save this crane” to keep it, with its load charts, for that vessel.</p>
       <div class="sub">Crane is on</div>
-      <div class="seg"><label><input type="radio" name="on" data-k="c.on" value="vessel">Vessel</label><label><input type="radio" name="on" data-k="c.on" value="platform">Platform</label></div>
+      <div class="seg"><label><input type="radio" name="on" data-k="c.on" value="vessel">Vessel / barge</label><label><input type="radio" name="on" data-k="c.on" value="platform">Platform</label></div>
       <div class="sub">Hook block in use</div>
       <div class="seg"><label><input type="radio" name="blk" data-k="c.block" value="aux">Aux block</label><label><input type="radio" name="blk" data-k="c.block" value="main">Main block</label></div>
       <div class="g2">
         <label class="f">Aux block SWL (t)<input type="number" inputmode="decimal" step="any" data-k="c.auxSWL"></label>
         <label class="f">Main block SWL (t)<input type="number" inputmode="decimal" step="any" data-k="c.mainSWL"></label>
+        <label class="f">Aux falls (parts of line)<input type="number" inputmode="numeric" data-k="c.fallsAux"></label>
+        <label class="f">Main falls (parts of line)<input type="number" inputmode="numeric" data-k="c.fallsMain"></label>
+        <label class="f">Boom length (m)<input type="number" inputmode="decimal" step="any" data-k="c.L"></label>
+        <label class="f">Aux head (whip) extension (m)<input type="number" inputmode="decimal" step="any" data-k="c.ext"></label>
+        <label class="f">Boom foot height above deck (m)<input type="number" inputmode="decimal" step="any" data-k="c.ped"></label>
+        <label class="f">Boom foot offset from slew centre (m)<input type="number" inputmode="decimal" step="any" data-k="c.foot"></label>
+        <label class="f">Min boom angle (°)<input type="number" inputmode="decimal" step="any" data-k="c.angMin"></label>
+        <label class="f">Max boom angle (°)<input type="number" inputmode="decimal" step="any" data-k="c.angMax"></label>
+        <label class="f">Crane deck height above sea (m)<input type="number" inputmode="decimal" step="any" data-k="c.sea"></label>
       </div>
-      <label class="f" style="margin-top:10px">Capacity at this radius from load chart (t) — leave blank to use block SWL<input type="number" inputmode="decimal" step="any" data-k="c.chart" placeholder="e.g. 10 for aux at all radius"></label>
       <div class="sub">Set the boom by</div>
       <div class="seg"><label><input type="radio" name="mode" data-k="c.mode" value="radius">Radius</label><label><input type="radio" name="mode" data-k="c.mode" value="angle">Boom angle</label></div>
       <div class="g2">
         <label class="f" id="fR">Working radius (m)<input type="number" inputmode="decimal" step="any" data-k="c.R"></label>
         <label class="f" id="fA">Boom angle (°)<input type="number" inputmode="decimal" step="any" data-k="c.ang"></label>
-        <label class="f">Boom length (m)<input type="number" inputmode="decimal" step="any" data-k="c.L"></label>
-        <label class="f">Boom foot height above deck (m)<input type="number" inputmode="decimal" step="any" data-k="c.ped"></label>
-        <label class="f">Boom foot offset from slew centre (m)<input type="number" inputmode="decimal" step="any" data-k="c.foot"></label>
-        <label class="f">Aux head (whip) extension (m)<input type="number" inputmode="decimal" step="any" data-k="c.ext"></label>
-        <label class="f">Crane deck height above sea (m)<input type="number" inputmode="decimal" step="any" data-k="c.sea"></label>
       </div>
-      <p class="hint">Radius is measured from the slew centre to the hook.</p>
     </div></section>
 
-    <section class="sec"><h2>3 · Set-down area</h2><div class="bd">
+    <section class="sec"><h2>3 · Load charts</h2><div class="bd">
+      <div class="seg"><label><input type="radio" name="cht" value="aux" checked>Aux block chart</label><label><input type="radio" name="cht" value="main">Main block chart</label></div>
+      <div class="chr" style="font-size:13px;color:var(--mut);margin-bottom:2px"><span>Radius up to (m)</span><span>Capacity (t)</span><span></span></div>
+      <div id="chart"></div>
+      <button class="addb" id="bRow">+ Add row</button>
+      <p class="hint">Copy these from the crane's own load chart. The capacity used is the one at the next listed radius equal to or larger than the working radius (the safer value). With no rows, the block SWL is used.</p>
+    </div></section>
+
+    <section class="sec"><h2>4 · Set-down area &amp; weather</h2><div class="bd">
       <div class="seg"><label><input type="radio" name="land" data-k="d.type" value="platform">Platform</label><label><input type="radio" name="land" data-k="d.type" value="vessel">Vessel</label><label><input type="radio" name="land" data-k="d.type" value="same">Same deck</label></div>
       <div class="g2">
         <label class="f">Name<input type="text" data-k="d.name" placeholder="CPWA07 cellar deck"></label>
         <label class="f">Height above crane deck (m, − if below)<input type="number" inputmode="decimal" step="any" data-k="d.elev"></label>
+        <label class="f">Direction of set-down (slew °)<input type="number" inputmode="decimal" step="any" data-k="d.brg"></label>
+        <label class="f">Platform decks above set-down<select data-k="d.decks"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></label>
+        <label class="f">Wind speed now (knots)<input type="number" inputmode="decimal" step="any" data-k="w.wind"></label>
+        <label class="f">Max wind for this lift (knots)<input type="number" inputmode="decimal" step="any" data-k="w.windMax"></label>
+        <label class="f">Wave height Hs now (m)<input type="number" inputmode="decimal" step="any" data-k="w.hs"></label>
+        <label class="f">Max Hs for this lift (m)<input type="number" inputmode="decimal" step="any" data-k="w.hsMax"></label>
       </div>
     </div></section>
 
-    <section class="sec"><h2>4 · Load &amp; slings</h2><div class="bd">
+    <section class="sec"><h2>5 · Load &amp; slings</h2><div class="bd">
       <div class="g2">
         <label class="f">Load name<input type="text" data-k="l.name"></label>
         <label class="f">Load weight (t)<input type="number" inputmode="decimal" step="any" data-k="l.W"></label>
@@ -161,8 +201,8 @@ input[type=text],input[type=number],input[type=date],select{font:16px Archivo,sy
         <label class="f">Sling legs<select data-k="l.legs"><option value="1">1 leg</option><option value="2">2 legs</option><option value="4">4 legs</option></select></label>
         <label class="f">Sling leg length (m)<input type="number" inputmode="decimal" step="any" data-k="l.sl"></label>
         <label class="f">Lifting point in from load end (m)<input type="number" inputmode="decimal" step="any" data-k="l.inset"></label>
-        <label class="f">Load &amp; slings size on sketch<select data-k="l.big"><option value="1">True scale</option><option value="1.5">1.5×</option><option value="2">2×</option><option value="3">3×</option></select></label>
         <label class="f">Sling SWL per leg (t)<input type="number" inputmode="decimal" step="any" data-k="l.slSWL"></label>
+        <label class="f">Load &amp; slings size on sketch<select data-k="l.big"><option value="1">True scale</option><option value="1.5">1.5×</option><option value="2">2×</option><option value="3">3×</option></select></label>
       </div>
       <p class="hint">4 legs: tension is worked out on 2 legs taking the load (rigid load).</p>
       <div class="sub">Load picture</div>
@@ -170,7 +210,7 @@ input[type=text],input[type=number],input[type=date],select{font:16px Archivo,sy
       <div class="seg" style="margin-top:8px"><label><input type="radio" name="sty" data-k="l.style" value="orig">Original</label><label><input type="radio" name="sty" data-k="l.style" value="line">Line drawing</label><label><input type="radio" name="sty" data-k="l.style" value="pencil">Pencil sketch</label></div>
     </div></section>
 
-    <section class="sec"><h2>5 · Lifting gear labels</h2><div class="bd">
+    <section class="sec"><h2>6 · Lifting gear labels</h2><div class="bd">
       <div id="gear"></div>
       <button class="addb" id="bGear">+ Add gear</button>
       <p class="hint">Pick where each label points. Drag the label on the drawing to move it.</p>
@@ -190,262 +230,325 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const num=v=>{const n=parseFloat(v);return isFinite(n)?n:NaN};
 const f1=(n,d=1)=>isFinite(n)?(+n.toFixed(d)).toString():'—';
 const RAD=Math.PI/180;
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
 const ANCH={hook:'Hook / master link',sling:'Sling',point:'Lifting point / shackle',load:'Load',block:'Hook block',boom:'Boom tip'};
 const today=()=>new Date().toISOString().slice(0,10);
 const DEF=()=>({name:'Untitled',
  tb:{project:'',lpno:'',title:'Crane lift plan – elevation view',by:'',date:today(),rev:'Rev 0'},
- c:{vessel:'M.V. GO Aliya',type:'Offshore pedestal lattice-boom crane',on:'vessel',block:'aux',auxSWL:'10',mainSWL:'80',chart:'',mode:'radius',R:'30',ang:'60',L:'46',ped:'8',foot:'1.5',ext:'2',sea:'4'},
- d:{type:'platform',name:'Platform cellar deck',elev:'9'},
- l:{name:'Load',W:'1.9',rig:'0.15',cont:'10',L:'6',H:'1.2',legs:'2',sl:'5',inset:'0.5',slSWL:'3.3',img:'',style:'orig',big:'2'},
+ c:{vessel:'M.V. GO Aliya',type:'Offshore pedestal lattice-boom crane',on:'vessel',block:'aux',auxSWL:'10',mainSWL:'80',fallsAux:'1',fallsMain:'4',
+    chartAux:[{r:'44',cap:'10'}],chartMain:[],mode:'radius',R:'30',ang:'60',angMin:'10',angMax:'80',slew:'90',lift:'0',L:'46',ped:'10',foot:'1.5',ext:'2',sea:'3'},
+ d:{type:'platform',name:'Platform cellar deck',elev:'9',brg:'90',decks:'2'},
+ w:{wind:'',windMax:'10',hs:'',hsMax:'1.0'},
+ l:{name:'Load',W:'1.9',rig:'0.15',cont:'10',L:'6',H:'1.2',legs:'2',sl:'5',inset:'0.5',slSWL:'3.3',img:'',style:'orig',big:'2',conv:{}},
  gear:[{t:'Master link 10.7t',a:'hook'},{t:'Wire sling Ø16mm × 5m × 2 (SWL 3.3t)',a:'sling'},{t:'Shackle 4.75t × 2',a:'point'}],
  lab:{}});
 let S=DEF();
 const get=k=>k.split('.').reduce((o,p)=>o?.[p],S);
 const set=(k,v)=>{const p=k.split('.'),last=p.pop();p.reduce((o,q)=>o[q],S)[last]=v};
 
+/* ---------- capacity from load chart ---------- */
+function capacity(aux,R){const c=S.c,swl=num(aux?c.auxSWL:c.mainSWL);
+  const rows=(aux?c.chartAux:c.chartMain).map(r=>[num(r.r),num(r.cap)]).filter(([r,k])=>isFinite(r)&&isFinite(k)).sort((a,b)=>a[0]-b[0]);
+  if(!rows.length)return{cap:swl,src:'swl'};
+  const hit=rows.find(([r])=>r>=R-1e-9);
+  if(!hit)return{cap:0,src:'beyond',max:rows[rows.length-1][0]};
+  return{cap:Math.min(hit[1],isFinite(swl)?swl:hit[1]),src:'chart',at:hit[0]};
+}
+
 /* ---------- geometry ---------- */
 function geo(){
   const c=S.c,l=S.l,d=S.d,aux=c.block=='aux';
   const L=num(c.L)||46,ped=num(c.ped)||0,foot=num(c.foot)||0,ext=Math.max(0,num(c.ext)||0),sea=num(c.sea)||0;
+  const amin=clamp(isFinite(num(c.angMin))?num(c.angMin):0,0,88),amax=clamp(num(c.angMax)||85,amin+1,89);
   const Lr=L+(aux?ext:0);let th,R,bad='';
-  if(c.mode=='angle'){th=Math.min(85,Math.max(0,num(c.ang)||0));R=foot+Lr*Math.cos(th*RAD)}
-  else{R=num(c.R);const k=(R-foot)/Lr;if(!(k>0&&k<1)){bad=`Radius must be between ${f1(foot+Lr*Math.cos(85*RAD))} m and ${f1(foot+Lr)} m for this boom.`;R=Math.min(Math.max(R||0,foot+Lr*Math.cos(85*RAD)),foot+Lr*.999)}th=Math.acos((R-foot)/Lr)/RAD}
+  if(c.mode=='angle'){th=clamp(num(c.ang)||0,0,89);R=foot+Lr*Math.cos(th*RAD)}
+  else{R=num(c.R);const k=(R-foot)/Lr;if(!(k>0&&k<1)){bad=`Radius must be between ${f1(foot+Lr*Math.cos(89*RAD))} m and ${f1(foot+Lr)} m for this boom.`;R=clamp(R||0,foot+Lr*Math.cos(89*RAD),foot+Lr*.999)}th=Math.acos((R-foot)/Lr)/RAD}
   const co=Math.cos(th*RAD),si=Math.sin(th*RAD);
   const fp=[foot,ped],tip=[foot+L*co,ped+L*si],auxS=[foot+(L+ext)*co,ped+(L+ext)*si],sheave=aux?auxS:tip;
   const y0=d.type=='same'?0:(num(d.elev)||0);
   const lL0=Math.max(.2,num(l.L)||1),lH0=Math.max(.1,num(l.H)||.5),legs=+l.legs||2,sl=num(l.sl)||0;
-  const half0=legs==1?0:Math.max(0,lL0/2-(num(l.inset)||0));
+  const half0=legs==1?0:clamp(lL0/2-(num(l.inset)||0),0,lL0/2);
   let h0,sa;
   if(legs==1){h0=Math.max(.5,sl);sa=90}else if(sl>half0){h0=Math.sqrt(sl*sl-half0*half0);sa=Math.asin(h0/sl)/RAD}else{h0=.3;sa=NaN}
-  const k=Math.min(4,Math.max(1,num(l.big)||1)),lL=lL0*k,lH=lH0*k,half=half0*k,h=h0*k;
-  const loadTop=y0+lH,hook=[sheave[0],loadTop+h];
-  const blockH=(aux?1.0:2.2)*Math.sqrt(k);
+  const blk0=aux?1.0:2.2;
+  const liftMax=Math.max(0,sheave[1]-blk0-1-(y0+lH0+h0));
+  const lift=clamp(num(c.lift)||0,0,liftMax);
+  const k=clamp(num(l.big)||1,1,4),lL=lL0*k,lH=lH0*k,half=half0*k,h=h0*k;
+  const base=y0+lift,loadTop=base+lH,hook=[sheave[0],loadTop+h];
+  const blockH=blk0*Math.sqrt(k);
   const total=((num(l.W)||0)+(num(l.rig)||0))*(1+(num(l.cont)||0)/100);
-  const cap=num(c.chart)>0?num(c.chart):num(aux?c.auxSWL:c.mainSWL);
-  const share=legs==1?1:2;
-  const leg=total/share/Math.sin((legs==1?90:sa)*RAD);
-  return{lL0,lH0,k,L,ped,foot,ext,sea,th,R,co,si,fp,tip,auxS,sheave,aux,y0,lL,lH,legs,half,h,sa,loadTop,hook,blockH,total,cap,leg,bad,gap:sheave[1]-(y0+lH0+h0+(aux?1:2.2))};
+  const cp=capacity(aux,R),cap=cp.cap;
+  const share=legs==1?1:2,leg=total/share/Math.sin((legs==1?90:sa)*RAD);
+  const falls=Math.max(1,Math.round(num(aux?c.fallsAux:c.fallsMain)||1)),pull=total/falls;
+  const hookH=base+lH0+h0;
+  const slew=((num(c.slew)||0)%360+360)%360,brg=((num(d.brg)||0)%360+360)%360;
+  let off=Math.abs(slew-brg);off=Math.min(off,360-off);
+  return{lL0,lH0,k,L,ped,foot,ext,sea,th,R,co,si,fp,tip,auxS,sheave,aux,y0,lL,lH,legs,half,h,sa,base,lift,liftMax,loadTop,hook,blockH,total,cap,cp,leg,falls,pull,hookH,slew,brg,off,amin,amax,bad,gap:sheave[1]-(hookH+blk0)};
 }
 
 /* ---------- drawing ---------- */
 const W=1600,DH=860,TB=200,CUR={};
 function draw(){
-  const g=geo(),c=S.c,d=S.d,l=S.l;
-  // world bounds
+  const g=geo(),c=S.c,d=S.d,l=S.l,onTarget=d.type=='same'||g.off<=10;
   const seaY=-g.sea;
-  const xs=[-16,g.tip[0]+4,g.auxS[0]+3,g.R+g.lL/2+12],ys=[seaY-3,g.tip[1]+3,g.auxS[1]+3,g.hook[1]+2];
+  const xs=[-52,g.tip[0]+4,g.auxS[0]+3,g.R+g.lL/2+18],ys=[seaY-3,g.tip[1]+3,g.auxS[1]+3,g.hook[1]+2,g.y0+(+d.decks||0)*5+6];
   const x0=Math.min(...xs),x1=Math.max(...xs),yb=Math.min(...ys),yt=Math.max(...ys);
   const ax=400,aw=W-ax-30,ay=30,ah=DH-60;
   const s=Math.min(aw/(x1-x0),ah/(yt-yb));
   const ox=ax+(aw-(x1-x0)*s)/2-x0*s,oy=ay+(ah-(yt-yb)*s)/2+yt*s;
   const X=x=>ox+x*s,Y=y=>oy-y*s,P=p=>`${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`;
   const ln=(a,b,st='#222',w=2,ex='')=>`<line x1="${X(a[0])}" y1="${Y(a[1])}" x2="${X(b[0])}" y2="${Y(b[1])}" stroke="${st}" stroke-width="${w}" ${ex}/>`;
-  let o='';
-  o+=`<defs><pattern id="mesh" width="14" height="14" patternUnits="userSpaceOnUse"><path d="M0 0L14 14M14 0L0 14" stroke="#9aa4b0" stroke-width="1"/></pattern>
+  const box=(xa,ya,xb,yb2,fill,st='#222',w=2)=>`<rect x="${X(Math.min(xa,xb))}" y="${Y(Math.max(ya,yb2))}" width="${Math.abs(xb-xa)*s}" height="${Math.abs(yb2-ya)*s}" fill="${fill}" stroke="${st}" stroke-width="${w}"/>`;
+  let o=`<defs><pattern id="mesh" width="14" height="14" patternUnits="userSpaceOnUse"><path d="M0 0L14 14M14 0L0 14" stroke="#9aa4b0" stroke-width="1"/></pattern>
   <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#222"/></marker>
   <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#c4221f"/></marker>
-  <filter id="lineart"><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncR type="discrete" tableValues="0 1 1"/><feFuncG type="discrete" tableValues="0 1 1"/><feFuncB type="discrete" tableValues="0 1 1"/></feComponentTransfer></filter></defs>`;
-  o+=`<rect width="${W}" height="${DH+TB}" fill="#fff"/>`;
-  // sea
-  o+=`<rect x="0" y="${Y(seaY)}" width="${W}" height="${Math.max(0,DH-Y(seaY))}" fill="#e4f0fb"/>`;
-  o+=`<line x1="0" x2="${W}" y1="${Y(seaY)}" y2="${Y(seaY)}" stroke="#4a8fd1" stroke-width="2"/>`;
+  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e3edf6"/><stop offset="1" stop-color="#ffffff"/></linearGradient></defs>`;
+  o+=`<rect width="${W}" height="${DH+TB}" fill="#fff"/><rect width="${W}" height="${Y(seaY)}" fill="url(#sky)"/>`;
+  o+=`<rect x="0" y="${Y(seaY)}" width="${W}" height="${Math.max(0,DH-Y(seaY))}" fill="#cfe2f3"/><line x1="0" x2="${W}" y1="${Y(seaY)}" y2="${Y(seaY)}" stroke="#4a8fd1" stroke-width="2"/>`;
   o+=`<text x="${W-40}" y="${Y(seaY)-8}" text-anchor="end" class="t s">MSL</text>`;
-  // structures
-  const hull=(a,b,dy)=>`<path d="M${X(a)},${Y(dy)} L${X(b)},${Y(dy)} L${X(b-2)},${Y(seaY-1.5)} L${X(a+1)},${Y(seaY-1.5)}Z" fill="#d6dbe1" stroke="#222" stroke-width="2"/><line x1="${X(a)}" x2="${X(b)}" y1="${Y(dy)}" y2="${Y(dy)}" stroke="#222" stroke-width="5"/>`;
-  const plat=(a,b,dy)=>{let p=`<rect x="${X(a)}" y="${Y(dy)}" width="${(b-a)*s}" height="${Math.max(6,.8*s)}" fill="#cfd5dc" stroke="#222" stroke-width="2"/>`;
-    const legs=[a+1.5,b-1.5];legs.forEach(x=>p+=ln([x,dy-.8],[x,seaY-1.5],'#222',4));
-    for(let y=dy-.8;y>seaY;y-=Math.max(3,(dy-seaY)/3)){const y2=Math.max(seaY-1.5,y-Math.max(3,(dy-seaY)/3));p+=ln([legs[0],y],[legs[1],y2],'#555',1.5)+ln([legs[1],y],[legs[0],y2],'#555',1.5)}
+  /* structures */
+  const barge=(a,b,dy,acc)=>{let p=`<path d="M${X(a)},${Y(dy)} L${X(b)},${Y(dy)} L${X(b)},${Y(seaY-1.6)} L${X(a+1.5)},${Y(seaY-1.6)} L${X(a)},${Y(seaY+.5)}Z" fill="#3b4048" stroke="#222" stroke-width="2"/>`;
+    p+=box(a,dy-.6,b,dy,'#c4221f','#222',1);
+    if(acc){const ax0=a+1,ax1=a+Math.min(20,(b-a)*.35);p+=box(ax0,dy,ax1,dy+3.2,'#f1f3f5')+box(ax0+1,dy+3.2,ax1-2,dy+6.4,'#f1f3f5')+box(ax0+3,dy+6.4,ax1-5,dy+9,'#f1f3f5');
+      for(let x=ax0+1;x<ax1-1.5;x+=1.6)p+=box(x,dy+1.4,x+.8,dy+2.3,'#7fa7c9','#444',1)+box(x+.6,dy+4.6,x+1.3,dy+5.5,'#7fa7c9','#444',1);
+      p+=`<circle cx="${X(ax0+4)}" cy="${Y(dy+10.2)}" r="${1.2*s}" fill="#fff" stroke="#444" stroke-width="1.5"/>`+ln([ax1-4,dy+9],[ax1-4,dy+13],'#444',2)}
+    return p};
+  const platform=(a,b,dy,decks,clr)=>{let p='';const legX=[a+2,b-2],top=dy+decks*5,mid=(a+b)/2,ua=clr!=null?Math.min(Math.max(a+1,clr),b-4):a+1;
+    p+=ln([legX[0],top],[legX[0]-1.5,seaY-1.8],'#3b4048',5)+ln([legX[1],top],[legX[1]+1.5,seaY-1.8],'#3b4048',5)+ln([mid,dy-.8],[mid,seaY-1.8],'#3b4048',4);
+    for(let y=dy-.8;y>seaY-1;){const y2=Math.max(seaY-1.8,y-4);p+=ln([legX[0],y],[mid,y2],'#555',1.5)+ln([legX[1],y],[mid,y2],'#555',1.5);y=y2}
+    for(let i=0;i<=decks;i++){const yy=dy+i*5,xa=i?ua:a,xb=i?b-1:b;p+=box(xa,yy-.7,xb,yy,i==0?'#f6d32d':'#f2c200');p+=ln([xa,yy+1.1],[xb,yy+1.1],'#c79a00',1.5);
+      if(i<decks)for(let x=ua+1;x<=b-2;x+=Math.max(2.5,(b-ua)/4))p+=ln([x,yy],[x,yy+4.3],'#c79a00',2)}
+    if(decks){const cm=(ua+b)/2;p+=box(cm-1.5,top,cm+1.5,top+3,'#f2c200')+ln([cm,top+3],[cm+4,top+6],'#c79a00',3)}
     return p};
   const loadL=g.R-g.lL/2,loadR=g.R+g.lL/2;
-  if(d.type=='same'){o+=(c.on=='vessel'?hull:plat)(-18,loadR+8,0)}
+  if(d.type=='same'){o+=c.on=='vessel'?barge(-50,loadR+8,0,true):platform(-14,loadR+8,0,0)}
   else{
-    const split=Math.max(6,loadL-4);
-    o+=(c.on=='vessel'?hull:plat)(-18,Math.min(split,10),0);
-    o+=(d.type=='vessel'?hull:plat)(Math.min(loadL-3,split+1.5),loadR+8,g.y0);
-    o+=`<text x="${X(loadR+8)-6}" y="${Y(g.y0)+(d.type=='vessel'?40:34)}" text-anchor="end" class="t s"><tspan x="${X(loadR+8)-6}">${esc(d.name)}</tspan><tspan x="${X(loadR+8)-6}" dy="20">EL ${g.y0>=0?'+':''}${f1(g.y0)} m from crane deck</tspan></text>`;
+    const split=Math.max(6,Math.min(loadL-4,12));
+    o+=c.on=='vessel'?barge(-50,split,0,true):platform(-14,split,0,+d.decks||0);
+    o+=`<g${onTarget?'':' opacity="0.35"'}>`+(d.type=='vessel'?barge(Math.min(loadL-3,split+1.5),loadR+12,g.y0,false):platform(Math.min(loadL-3,split+1.5),loadR+14,g.y0,+d.decks||0,loadR+1.5))+`</g>`;
+    o+=`<text x="${X(loadL)}" y="${Y(g.y0)+24}" class="t s"><tspan x="${X(loadL)}">${esc(d.name)} · EL ${g.y0>=0?'+':''}${f1(g.y0)} m</tspan></text>`;
   }
-  // crane pedestal + house
-  const hb=Math.max(0,g.ped-2.6);
-  o+=`<rect x="${X(-1.3)}" y="${Y(hb)}" width="${2.6*s}" height="${hb*s}" fill="#f2c200" stroke="#222" stroke-width="2"/>`;
-  o+=`<rect x="${X(-3)}" y="${Y(g.ped+1.4)}" width="${6*s}" height="${4*s}" fill="#f6d32d" stroke="#222" stroke-width="2"/>`;
-  o+=`<rect x="${X(2.2)}" y="${Y(g.ped+.9)}" width="${1.6*s}" height="${2*s}" fill="#bcd9ef" stroke="#222" stroke-width="2"/>`;
-  // A-frame + pendants
-  const af=[-1.5,g.ped+6];
-  o+=ln([-2.6,g.ped+1.4],af,'#222',3)+ln([0.5,g.ped+1.4],af,'#222',3);
-  o+=ln(af,g.tip,'#555',1.5)+ln([af[0]-.3,af[1]-.2],[g.tip[0]-.2,g.tip[1]-.3],'#555',1.5);
-  // lattice boom
-  const lat=(a,b,w0,w1,n,col)=>{const dx=b[0]-a[0],dy=b[1]-a[1],len=Math.hypot(dx,dy),ux=dx/len,uy=dy/len,nx=-uy,ny=ux;
+  /* crane: pedestal, house, A-frame */
+  const hb=Math.max(0,g.ped-3);
+  o+=box(-1.4,0,1.4,hb,'#f2c200')+box(-2.2,hb-.6,2.2,hb,'#e0b000');
+  o+=box(-3.2,hb,3.4,g.ped+1.6,'#f6d32d')+box(2,g.ped-.6,3.6,g.ped+1.4,'#bcd9ef');
+  const af=[-1.2,g.ped+9];o+=ln([-3,g.ped+1.6],af,'#e0b000',6)+ln([.8,g.ped+1.6],af,'#e0b000',6);
+  o+=ln(af,g.tip,'#555',1.5)+ln([af[0]+.3,af[1]-.4],[g.tip[0]-.3,g.tip[1]-.4],'#555',1.5);
+  /* red / white lattice boom */
+  const lat=(a,b,w0,w1,n)=>{const dx=b[0]-a[0],dy=b[1]-a[1],len=Math.hypot(dx,dy),nx=-dy/len,ny=dx/len;
     const pt=(t,side)=>{const w=(t<.12?w0+(w1-w0)*t/.12:t>.88?w0+(w1-w0)*(1-t)/.12:w1)*side/2;return[a[0]+dx*t+nx*w,a[1]+dy*t+ny*w]};
-    let p=`<polyline points="${Array.from({length:21},(_,i)=>P(pt(i/20,1))).join(' ')}" fill="none" stroke="${col}" stroke-width="3"/><polyline points="${Array.from({length:21},(_,i)=>P(pt(i/20,-1))).join(' ')}" fill="none" stroke="${col}" stroke-width="3"/>`;
-    let z=[];for(let i=0;i<=n;i++)z.push(P(pt(i/n,i%2?1:-1)));p+=`<polyline points="${z.join(' ')}" fill="none" stroke="${col}" stroke-width="1.3"/>`;return p};
-  o+=lat(g.fp,g.tip,.5,1.4,Math.round(g.L/1.6),'#c79a00');
-  if(g.ext>0)o+=lat(g.tip,g.auxS,.6,.6,3,'#c79a00');
+    let p='';const seg=8;
+    for(let j=0;j<seg;j++){const col=j%2?'#c4221f':'#ffffff',pts=sd=>Array.from({length:6},(_,i)=>P(pt((j+i/5)/seg,sd))).join(' ');
+      p+=`<polyline points="${pts(1)}" fill="none" stroke="#222" stroke-width="6"/><polyline points="${pts(-1)}" fill="none" stroke="#222" stroke-width="6"/><polyline points="${pts(1)}" fill="none" stroke="${col}" stroke-width="3.5"/><polyline points="${pts(-1)}" fill="none" stroke="${col}" stroke-width="3.5"/>`}
+    const z=[];for(let i=0;i<=n;i++)z.push(P(pt(i/n,i%2?1:-1)));p+=`<polyline points="${z.join(' ')}" fill="none" stroke="#c4221f" stroke-width="1.3"/>`;return p};
+  o+=lat(g.fp,g.tip,.6,1.6,Math.round(g.L/1.5));
+  if(g.ext>0)o+=lat(g.tip,g.auxS,.7,.7,3);
   o+=`<circle cx="${X(g.fp[0])}" cy="${Y(g.fp[1])}" r="7" fill="#222"/><circle cx="${X(g.tip[0])}" cy="${Y(g.tip[1])}" r="8" fill="#fff" stroke="#222" stroke-width="3"/>`;
   if(g.ext>0)o+=`<circle cx="${X(g.auxS[0])}" cy="${Y(g.auxS[1])}" r="6" fill="#fff" stroke="#222" stroke-width="3"/>`;
-  // parked block (the one not in use)
   if(g.aux){const pk=[g.tip[0],g.tip[1]-1.8];o+=ln(g.tip,pk,'#777',2)+`<rect x="${X(pk[0])-12}" y="${Y(pk[1])}" width="24" height="30" rx="4" fill="#bbb" stroke="#666" stroke-width="2"/>`}
   else if(g.ext>0){const pk=[g.auxS[0],g.auxS[1]-1.5];o+=ln(g.auxS,pk,'#777',2)+`<circle cx="${X(pk[0])}" cy="${Y(pk[1])+8}" r="9" fill="#bbb" stroke="#666" stroke-width="2"/>`}
-  // hoist rope + block
+  /* hoist rope + block + hook */
   const bTop=[g.hook[0],g.hook[1]+g.blockH];
-  o+=ln(g.sheave,bTop,'#222',g.aux?2:3);
-  if(g.aux){o+=`<circle cx="${X(bTop[0])}" cy="${Y(bTop[1]-.45)}" r="${Math.max(9,.45*s)}" fill="#e8501a" stroke="#222" stroke-width="2"/>`}
+  if(g.falls>1&&!g.aux){const nf=Math.min(g.falls,4);for(let i=0;i<nf;i++){const dx=(i-(nf-1)/2)*.25;o+=ln([g.sheave[0]+dx,g.sheave[1]],[bTop[0]+dx,bTop[1]],'#222',1.6)}}
+  else o+=ln(g.sheave,bTop,'#222',2);
+  if(g.aux)o+=`<circle cx="${X(bTop[0])}" cy="${Y(bTop[1]-.45)}" r="${Math.max(9,.45*s)}" fill="#e8501a" stroke="#222" stroke-width="2"/>`;
   else{const bw=Math.max(22,1.2*s),bh=Math.max(30,1.7*s);o+=`<rect x="${X(bTop[0])-bw/2}" y="${Y(bTop[1])}" width="${bw}" height="${bh}" rx="6" fill="#e8501a" stroke="#222" stroke-width="2"/><circle cx="${X(bTop[0])}" cy="${Y(bTop[1])+bh*.35}" r="${bw*.28}" fill="none" stroke="#222" stroke-width="2"/>`}
   const hk=[X(g.hook[0]),Y(g.hook[1])];
-  o+=`<path d="M${hk[0]},${hk[1]-14} v8 q0,14 -10,14 q-9,0 -9,-9" fill="none" stroke="#222" stroke-width="4" stroke-linecap="round"/>`;
-  o+=`<ellipse cx="${hk[0]}" cy="${hk[1]}" rx="9" ry="6" fill="none" stroke="#7b3fbf" stroke-width="3"/>`;
-  // load
+  o+=`<path d="M${hk[0]},${hk[1]-14} v8 q0,14 -10,14 q-9,0 -9,-9" fill="none" stroke="#222" stroke-width="4" stroke-linecap="round"/><ellipse cx="${hk[0]}" cy="${hk[1]}" rx="9" ry="6" fill="none" stroke="#7b3fbf" stroke-width="3"/>`;
+  /* load */
   const lb=[X(loadL),Y(g.loadTop),g.lL*s,g.lH*s];
-  o+=`<g data-drag="load">`;
   const shown=l.style=='orig'?l.img:(l.conv?.[l.style]||l.img);
-  if(l.img)o+=`<image href="${shown}" x="${lb[0]}" y="${lb[1]}" width="${lb[2]}" height="${lb[3]}" preserveAspectRatio="xMidYMid meet"/><rect x="${lb[0]}" y="${lb[1]}" width="${lb[2]}" height="${lb[3]}" fill="transparent" stroke="#999" stroke-dasharray="6 5"/>`;
-  else o+=`<rect x="${lb[0]}" y="${lb[1]}" width="${lb[2]}" height="${lb[3]}" fill="url(#mesh)" stroke="#222" stroke-width="2.5"/>`;
-  o+=`</g>`;
-  // slings
+  o+=`<g data-drag="load">`+(l.img?`<image href="${shown}" x="${lb[0]}" y="${lb[1]}" width="${lb[2]}" height="${lb[3]}" preserveAspectRatio="xMidYMid meet"/><rect x="${lb[0]}" y="${lb[1]}" width="${lb[2]}" height="${lb[3]}" fill="transparent" stroke="#999" stroke-dasharray="6 5"/>`:`<rect x="${lb[0]}" y="${lb[1]}" width="${lb[2]}" height="${lb[3]}" fill="url(#mesh)" stroke="#222" stroke-width="2.5"/>`)+`</g>`;
+  if(g.lift>0.05)o+=ln([g.R+g.lL/2+1,g.y0],[g.R+g.lL/2+1,g.base],'#e8501a',2,'marker-start="url(#ar)" marker-end="url(#ar)"')+`<text x="${X(g.R+g.lL/2+1.4)}" y="${Y(g.y0+g.lift/2)}" class="t s">${f1(g.lift)} m</text>`;
+  /* slings + draggable shackles */
   const pts=g.legs==1?[[g.R,g.loadTop]]:[[g.R-g.half,g.loadTop],[g.R+g.half,g.loadTop]];
-  pts.forEach(p=>{o+=ln(g.hook,p,'#d0201b',3);o+=`<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="7" fill="#7b3fbf" stroke="#fff" stroke-width="2"/>`});
-  if(g.legs==4)o+=`<text x="${X(g.R)}" y="${Y(g.loadTop)+18}" text-anchor="middle" class="t s">4-leg sling (2 legs shown)</text>`;
-  // radius dimension
-  const dy=Math.min(0,g.y0)-g.sea*0+ -1.2;const dimY=Y(Math.min(0,g.y0))+46;
-  o+=`<line x1="${X(0)}" x2="${X(0)}" y1="${Y(g.ped+1.4)}" y2="${dimY+12}" stroke="#222" stroke-dasharray="10 6 2 6" stroke-width="1.5"/>`;
+  pts.forEach((p,i)=>{o+=ln(g.hook,p,'#d0201b',3)+`<g data-drag="pt${i}"><circle cx="${X(p[0])}" cy="${Y(p[1])}" r="9" fill="#7b3fbf" stroke="#fff" stroke-width="2"/></g>`});
+  /* radius dimension + angles */
+  const dimY=Y(Math.min(0,g.y0))+46;
+  o+=`<line x1="${X(0)}" x2="${X(0)}" y1="${Y(g.ped+1.6)}" y2="${dimY+12}" stroke="#222" stroke-dasharray="10 6 2 6" stroke-width="1.5"/>`;
   o+=`<line x1="${X(g.R)}" x2="${X(g.R)}" y1="${Y(g.hook[1])}" y2="${dimY+12}" stroke="#222" stroke-dasharray="4 5" stroke-width="1.2"/>`;
   o+=`<line x1="${X(0)}" x2="${X(g.R)}" y1="${dimY}" y2="${dimY}" stroke="#222" stroke-width="2" marker-start="url(#ar)" marker-end="url(#ar)"/>`;
-  // boom angle arc
   const ar=Math.min(4.5,g.L*.18),a1=[g.fp[0]+ar,g.fp[1]],a2=[g.fp[0]+ar*g.co,g.fp[1]+ar*g.si];
-  o+=ln(g.fp,[g.fp[0]+ar*1.4,g.fp[1]],'#222',1.2,'stroke-dasharray="4 4"');
-  o+=`<path d="M${P(a1)} A${ar*s},${ar*s} 0 0 0 ${P(a2)}" fill="none" stroke="#222" stroke-width="2"/>`;
-  // sling angle arc
-  if(g.legs!=1&&isFinite(g.sa)){const p=pts[1],r=1.1*s,ang=g.sa*RAD;o+=`<path d="M${X(p[0])-r},${Y(p[1])} A${r},${r} 0 0 1 ${X(p[0])-r*Math.cos(ang)},${Y(p[1])-r*Math.sin(ang)}" fill="none" stroke="#d0201b" stroke-width="2"/>`}
-  // draggable labels
-  const lab=(key,ax,ay,txt,dx,dy,cls='t',leader=false,anc='start')=>{const o2=S.lab[key]||{dx,dy};CUR[key]={dx:o2.dx,dy:o2.dy};const tx=ax+o2.dx,ty=ay+o2.dy,lines=String(txt).split('\n');
-    return`${leader?`<line x1="${ax}" y1="${ay}" x2="${tx}" y2="${ty-6}" stroke="#c4221f" stroke-width="2" marker-start="url(#arr)"/>`:''}<g data-drag="lab:${key}"><text x="${tx}" y="${ty}" class="${cls}" text-anchor="${anc}">${lines.map((t,i)=>`<tspan x="${tx}" dy="${i?24:0}">${esc(t)}</tspan>`).join('')}</text></g>`};
+  o+=ln(g.fp,[g.fp[0]+ar*1.4,g.fp[1]],'#222',1.2,'stroke-dasharray="4 4"')+`<path d="M${P(a1)} A${ar*s},${ar*s} 0 0 0 ${P(a2)}" fill="none" stroke="#222" stroke-width="2"/>`;
+  if(g.legs!=1&&isFinite(g.sa)){const p=pts[1],r=1.1*s,an=g.sa*RAD;o+=`<path d="M${X(p[0])-r},${Y(p[1])} A${r},${r} 0 0 1 ${X(p[0])-r*Math.cos(an)},${Y(p[1])-r*Math.sin(an)}" fill="none" stroke="#d0201b" stroke-width="2"/>`}
+  /* labels */
+  const lab=(key,ax0,ay0,txt,dx,dy,cls='t',leader=false,anc='start')=>{const o2=S.lab[key]||{dx,dy};CUR[key]={dx:o2.dx,dy:o2.dy};const tx=ax0+o2.dx,ty=ay0+o2.dy,lines=String(txt).split('\n');
+    return`${leader?`<line x1="${ax0}" y1="${ay0}" x2="${tx}" y2="${ty-6}" stroke="#c4221f" stroke-width="2" marker-start="url(#arr)"/>`:''}<g data-drag="lab:${key}"><text x="${tx}" y="${ty}" class="${cls}" text-anchor="${anc}">${lines.map((t,i)=>`<tspan x="${tx}" dy="${i?24:0}">${esc(t)}</tspan>`).join('')}</text></g>`};
   o+=lab('rad',(X(0)+X(g.R))/2-80,dimY+28,`Working radius ${f1(g.R)} m`,0,0,'t b');
   o+=lab('ang',X(g.fp[0])+ar*s+10,Y(g.fp[1])-ar*s*.35,`Boom angle ${f1(g.th)}°`,0,0,'t b');
-  o+=lab('tip',X(g.sheave[0])+16,Y(g.sheave[1])-10,`${g.aux?'Aux':'Main'} block SWL ${f1(num(g.aux?c.auxSWL:c.mainSWL))} t\nBoom ${f1(g.L)} m · tip ${f1(g.tip[1])} m above deck`,0,0,'t');
+  const tl=X(g.sheave[0])>W*.72;o+=lab('tip',X(g.sheave[0])+(tl?-16:16),Y(g.sheave[1])-10,`${g.aux?'Aux':'Main'} block SWL ${f1(num(g.aux?c.auxSWL:c.mainSWL))} t · ${g.falls} fall${g.falls>1?'s':''}\nBoom ${f1(g.L)} m · tip ${f1(g.tip[1])} m above deck`,0,0,'t',false,tl?'end':'start');
   if(isFinite(g.sa)&&g.legs!=1)o+=lab('sa',X(pts[1][0])+14,Y(pts[1][1])-30,`Sling angle ${f1(g.sa)}°`,0,0,'t r');
-  o+=lab('load',X(loadL),Y(g.y0)-g.lH*s-(g.k>1?40:14),`${l.name||'Load'} · ${f1(num(l.W),2)} t · ${f1(g.lL0)} m × ${f1(g.lH0)} m`+(g.k>1?`\n(load & slings drawn ${f1(g.k)}× for clarity)`:''),-12-40,0,'t b');
-  // gear labels
-  const anchor={hook:[hk[0],hk[1]],block:[X(bTop[0]),Y(bTop[1]-.5)],sling:[(hk[0]+X(pts[pts.length-1][0]))/2,(hk[1]+Y(pts[pts.length-1][1]))/2],point:[X(pts[0][0]),Y(pts[0][1])],load:[X(g.R),Y(g.y0+g.lH/2)],boom:[X(g.sheave[0]),Y(g.sheave[1])]};
-  const left=hk[0]>W*.62;S.gear.forEach((gr,i)=>{const a=anchor[gr.a]||anchor.hook;o+=lab('g'+i+gr.a,a[0],a[1],gr.t,(left?-130:110)+(left?hk[0]-a[0]:hk[0]-a[0]),-170+i*34-(a[1]-hk[1]),'t g',true,left?'end':'start')});
-  // info box
-  const st=g.total/g.cap*100;
-  const info=[['Crane',`${c.vessel||''}${c.vessel?' · ':''}${c.type||'Crane'}`],['Block in use',`${g.aux?'Aux':'Main'} block · SWL ${f1(num(g.aux?c.auxSWL:c.mainSWL))} t`],['Capacity at radius',`${f1(g.cap,2)} t${num(c.chart)>0?' (load chart)':' (block SWL)'}`],['Radius / boom angle',`${f1(g.R)} m / ${f1(g.th)}°`],['Boom length / tip height',`${f1(g.L)} m / ${f1(g.tip[1])} m`],['Load weight',`${f1(num(l.W),2)} t`],['Total lift weight',`${f1(g.total,3)} t (incl. rigging + ${f1(num(l.cont))}%)`],['Crane utilisation',`${f1(st)}%`],['Sling angle / leg tension',`${f1(g.sa)}° / ${f1(g.leg,3)} t`]];
-  o+=`<rect x="20" y="20" width="360" height="${44+info.length*44}" fill="#fff" stroke="#222" stroke-width="2"/><rect x="20" y="20" width="360" height="36" fill="#222a35"/><text x="34" y="45" fill="#fff" class="t b">LIFT DATA</text>`;
-  info.forEach(([k,v],i)=>{const y=80+i*44;o+=`<text x="34" y="${y}" class="t s">${esc(k)}</text><text x="34" y="${y+20}" class="t ${k=='Crane utilisation'?'b':''}" ${k=='Crane utilisation'?`fill="${st>100?'#c4221f':st>=80?'#a86200':'#13804a'}"`:''}>${esc(v)}</text>`});
-  // north arrow-ish view label
-  o+=`<text x="${W-30}" y="44" text-anchor="end" class="t b">ELEVATION VIEW · NTS</text>`;
-  // title block
+  o+=lab('load',X(loadL),Y(g.base)-g.lH*s-(g.k>1?40:14),`${l.name||'Load'} · ${f1(num(l.W),2)} t · ${f1(g.lL0)} m × ${f1(g.lH0)} m`+(g.k>1?`\n(load & slings drawn ${f1(g.k)}× for clarity)`:''),-40,0,'t b');
+  const anchor={hook:hk,block:[X(bTop[0]),Y(bTop[1]-.5)],sling:[(hk[0]+X(pts[pts.length-1][0]))/2,(hk[1]+Y(pts[pts.length-1][1]))/2],point:[X(pts[0][0]),Y(pts[0][1])],load:[X(g.R),Y(g.base+g.lH/2)],boom:[X(g.sheave[0]),Y(g.sheave[1])]};
+  const left=hk[0]>W*.62;
+  S.gear.forEach((gr,i)=>{const a=anchor[gr.a]||anchor.hook;o+=lab('g'+i+gr.a,a[0],a[1],gr.t,(left?-130:110)+hk[0]-a[0],-170+i*34-(a[1]-hk[1]),'t g',true,left?'end':'start')});
+  if(!onTarget)o+=`<text x="${X(g.R)}" y="${Y(g.y0)+48}" text-anchor="middle" class="t r">Hook not over set-down — slew ${f1(g.off,0)}°</text>`;
+  /* LIFT DATA box */
+  const util=g.total/g.cap*100;
+  const info=[['Crane',`${c.vessel||''}${c.vessel?' · ':''}${c.type||'Crane'}`],['Block in use',`${g.aux?'Aux':'Main'} · SWL ${f1(num(g.aux?c.auxSWL:c.mainSWL))} t · ${g.falls} fall${g.falls>1?'s':''}`],['Rated capacity at radius',`${f1(g.cap,2)} t (${g.cp.src=='chart'?'load chart ≤ '+f1(g.cp.at)+' m':g.cp.src=='swl'?'block SWL':'beyond chart'})`],['Radius / boom angle / slew',`${f1(g.R)} m / ${f1(g.th)}° / ${f1(g.slew,0)}°`],['Boom / tip height',`${f1(g.L)} m / ${f1(g.tip[1])} m`],['Total lift weight',`${f1(g.total,3)} t (load ${f1(num(l.W),2)} t + rigging + ${f1(num(l.cont))}%)`],['Crane utilisation',`${f1(util)}%`],['Line pull per fall',`${f1(g.pull,3)} t`],['Sling angle / tension per leg',`${f1(g.sa)}° / ${f1(g.leg,3)} t`]];
+  o+=`<rect x="20" y="20" width="360" height="${44+info.length*44}" fill="#fff" stroke="#222" stroke-width="2"/><rect x="20" y="20" width="360" height="36" fill="#222a35"/><text x="34" y="45" fill="#fff" style="font:700 18px Arial,sans-serif">LIFT DATA</text>`;
+  info.forEach(([k,v],i)=>{const y=80+i*44,hot=k=='Crane utilisation';o+=`<text x="34" y="${y}" class="t s">${esc(k)}</text><text x="34" y="${y+20}" class="t ${hot?'b':''}" ${hot?`style="fill:${util>100?'#c4221f':util>=80?'#a86200':'#13804a'}"`:''}>${esc(v)}</text>`});
+  /* plan view inset */
+  const px=20,py=490,pw=360,ph=300,pc=[px+pw*.5,py+ph*.58],ps=Math.min(pw,ph)/(Math.max(g.R+10,36)*2.2);
+  o+=`<rect x="${px}" y="${py}" width="${pw}" height="${ph}" fill="#f4f8fc" stroke="#222" stroke-width="1.5"/><text x="${px+8}" y="${py+20}" class="t s b">PLAN VIEW</text>`;
+  const pv=(r,deg)=>[pc[0]+r*ps*Math.sin(deg*RAD),pc[1]-r*ps*Math.cos(deg*RAD)];
+  if(c.on=='vessel'){const bl=60*ps,bw=18*ps;o+=`<path d="M${pc[0]-bw/2},${pc[1]+bl*.6} L${pc[0]-bw/2},${pc[1]-bl*.3} L${pc[0]},${pc[1]-bl*.45} L${pc[0]+bw/2},${pc[1]-bl*.3} L${pc[0]+bw/2},${pc[1]+bl*.6}Z" fill="#d6dbe1" stroke="#222" stroke-width="1.5"/><text x="${pc[0]}" y="${pc[1]-bl*.45-6}" text-anchor="middle" class="t s">BOW</text>`}
+  else o+=`<rect x="${pc[0]-12*ps}" y="${pc[1]-12*ps}" width="${24*ps}" height="${24*ps}" fill="#f6d32d" stroke="#222" stroke-width="1.5"/>`;
+  if(d.type!='same'){const t=pv(g.R,g.brg),sz=Math.max(18,12*ps);o+=`<rect x="${t[0]-sz/2}" y="${t[1]-sz/2}" width="${sz}" height="${sz}" fill="${d.type=='vessel'?'#d6dbe1':'#f6d32d'}" stroke="#222" stroke-width="1.5" transform="rotate(${g.brg} ${t[0]} ${t[1]})"/>`}
+  o+=`<circle cx="${pc[0]}" cy="${pc[1]}" r="${g.R*ps}" fill="none" stroke="#5b6470" stroke-dasharray="5 5"/>`;
+  const hp=pv(g.R,g.slew);o+=`<line x1="${pc[0]}" y1="${pc[1]}" x2="${hp[0]}" y2="${hp[1]}" stroke="#c4221f" stroke-width="4"/><circle cx="${pc[0]}" cy="${pc[1]}" r="6" fill="#f2c200" stroke="#222" stroke-width="2"/><circle cx="${hp[0]}" cy="${hp[1]}" r="6" fill="#e8501a" stroke="#222" stroke-width="2"/>`;
+  o+=`<text x="${px+pw-8}" y="${py+ph-10}" text-anchor="end" class="t s">Slew ${f1(g.slew,0)}° · R ${f1(g.R)} m</text>`;
+  o+=`<text x="${W-30}" y="${DH-14}" text-anchor="end" class="t b">ELEVATION VIEW · NTS</text>`;
+  /* title block */
   const tb=S.tb,ty=DH;
   o+=`<rect x="0" y="${ty}" width="${W}" height="${TB}" fill="#fff"/><rect x="10" y="${ty+10}" width="${W-20}" height="${TB-20}" fill="none" stroke="#222" stroke-width="3"/>`;
-  const cells=[[10,560,'Title',tb.title],[570,420,'Platform / project',tb.project],[990,300,'Lift plan no.',tb.lpno],[1290,300,'Rev / scale',`${tb.rev||''} · NTS`]],cells2=[[10,560,'Set-down',d.type=='same'?'Same deck':`${d.name} (EL ${g.y0>=0?'+':''}${f1(g.y0)} m)`],[570,420,'Prepared by',tb.by],[990,300,'Date',tb.date],[1290,300,'Sketch',S.name]];
+  const cells=[[10,560,'Title',tb.title],[570,420,'Platform / project',tb.project],[990,300,'Lift plan no.',tb.lpno],[1290,300,'Rev / scale',`${tb.rev||''} · NTS`]],cells2=[[10,560,'Set-down',d.type=='same'?'Same deck':`${d.name} (EL ${g.y0>=0?'+':''}${f1(g.y0)} m)`],[570,420,'Prepared by',tb.by],[990,300,'Date',tb.date],[1290,300,'Vessel / crane',c.vessel]];
   [[cells,ty+10],[cells2,ty+100]].forEach(([row,y])=>row.forEach(([x,w,k,v])=>{o+=`<rect x="${x}" y="${y}" width="${w}" height="90" fill="none" stroke="#222" stroke-width="1.5"/><text x="${x+12}" y="${y+28}" class="t s">${esc(k)}</text><text x="${x+12}" y="${y+64}" class="t b big">${esc(v||'')}</text>`}));
-  const svg=$('svg');svg.setAttribute('viewBox',`0 0 ${W} ${DH+TB}`);
-  svg.innerHTML=`<style>.t{font:20px Arial,Helvetica,sans-serif;fill:#15191f;paint-order:stroke;stroke:#fff;stroke-width:5px;stroke-linejoin:round}.b{font-weight:700}.s{font-size:16px;fill:#5b6470}.r{fill:#c4221f;font-weight:700}.g{fill:#c4221f;font-weight:700;font-size:19px}.big{font-size:22px}</style>`+o;
-  results(g);
+  $('svg').innerHTML=`<style>.t{font:20px Arial,Helvetica,sans-serif;fill:#15191f;paint-order:stroke;stroke:#fff;stroke-width:5px;stroke-linejoin:round}.b{font-weight:700}.s{font-size:16px;fill:#5b6470}.r{fill:#c4221f;font-weight:700}.g{fill:#c4221f;font-weight:700;font-size:19px}.big{font-size:22px}</style>`+o;
+  panel(g);
 }
 
-/* ---------- results panel ---------- */
-function results(g){
-  const util=g.total/g.cap*100,c=S.c,l=S.l;
-  $('r_R').textContent=f1(g.R)+' m';$('r_A').textContent=f1(g.th)+'°';$('r_T').textContent=f1(g.tip[1])+' m';
-  $('r_W').textContent=f1(g.total,3)+' t';$('r_C').textContent=f1(g.cap,2)+' t';$('r_U').textContent=f1(util)+'%';
-  $('r_S').textContent=isFinite(g.sa)?f1(g.sa)+'°':'—';$('r_L').textContent=isFinite(g.leg)?f1(g.leg,3)+' t':'—';$('r_H').textContent=f1(g.gap)+' m';
+/* ---------- LMI + verdicts ---------- */
+let holding=false;
+function panel(g){
+  const c=S.c,l=S.l,w=S.w,util=g.total/g.cap*100;
+  const T=(id,v)=>{$(id).textContent=v};
+  T('m_R',f1(g.R)+' m');T('m_A',f1(g.th)+'°');T('m_S',f1(g.slew,0)+'°');T('m_W',f1(g.total,2)+' t');T('m_C',f1(g.cap,2)+' t');T('m_U',isFinite(util)?f1(util)+'%':'—');
+  T('m_H',f1(g.hookH)+' m');T('m_P',f1(g.pull,2)+' t');T('m_T',isFinite(g.leg)?f1(g.leg,2)+' t':'—');
+  const bar=$('m_bar');bar.style.width=clamp(isFinite(util)?util:0,0,100)+'%';bar.style.background=util>100?'#ff4d4d':util>=80?'#ffd23f':'#2fd06b';
+  const msg=$('m_msg');msg.style.color=util>100?'#ff8a8a':util>=80?'#ffd23f':'#7fe3a0';
+  msg.textContent=g.cp.src=='beyond'?'OUT OF LOAD CHART — DO NOT LIFT':!isFinite(util)?'Enter load weight and capacity':util>100?'OVERLOAD — DO NOT LIFT':util>=80?'APPROACHING RATED CAPACITY':'WITHIN RATED CAPACITY';
   const v=[];
   if(g.bad)v.push(['v-bad','✕ '+g.bad]);
-  if(!isFinite(util))v.push(['v-warn','Enter load weight and block capacity.']);
-  else if(util>100)v.push(['v-bad',`✕ Over capacity — ${f1(g.total,3)} t on ${f1(g.cap,2)} t. Do not lift.`]);
+  if(g.th<g.amin-1e-6||g.th>g.amax+1e-6)v.push(['v-bad',`✕ Boom angle ${f1(g.th)}° is outside the crane's range ${f1(g.amin)}°–${f1(g.amax)}°.`]);
+  if(g.cp.src=='beyond')v.push(['v-bad',`✕ Radius ${f1(g.R)} m is beyond the load chart (max ${f1(g.cp.max)} m). Do not lift.`]);
+  else if(util>100)v.push(['v-bad',`✕ Over rated capacity — ${f1(g.total,3)} t on ${f1(g.cap,2)} t. Do not lift.`]);
   else if(util>=80)v.push(['v-warn',`! High utilisation ${f1(util)}% — check your lifting procedure.`]);
-  else v.push(['v-ok',`✓ Within capacity — ${f1(util)}% utilisation, ${f1(100-util)}% margin.`]);
-  if(!g.aux&&!(num(c.chart)>0))v.push(['v-warn','! Main block: enter the capacity at this radius from the load chart. 80 t is the block SWL, not the capacity at every radius.']);
+  else if(isFinite(util))v.push(['v-ok',`✓ Within rated capacity — ${f1(util)}% utilisation, ${f1(100-util)}% margin.`]);
+  if(g.cp.src=='swl'&&!g.aux)v.push(['v-warn','! No main block load chart entered — the block SWL is not the capacity at every radius. Add the chart in section 3.']);
   if(g.legs!=1&&!isFinite(g.sa))v.push(['v-bad','✕ Slings are too short to reach the lifting points.']);
   else if(g.sa<30)v.push(['v-bad',`✕ Sling angle ${f1(g.sa)}° is below 30° — use longer slings or a spreader bar.`]);
   else if(g.sa<45)v.push(['v-warn',`! Sling angle ${f1(g.sa)}° is below 45° — high sling tension.`]);
   const sw=num(l.slSWL);if(isFinite(sw)&&isFinite(g.leg))v.push(g.leg<=sw?['v-ok',`✓ Sling OK — ${f1(g.leg,3)} t per leg on ${f1(sw,2)} t SWL.`]:['v-bad',`✕ Sling overloaded — ${f1(g.leg,3)} t per leg on ${f1(sw,2)} t SWL.`]);
-  if(g.gap<1)v.push(['v-bad',`✕ Hook block is only ${f1(g.gap)} m below the sheave — two-blocking risk.`]);
-  $('verdicts').innerHTML=v.map(([c,t])=>`<div class="verdict ${c}">${esc(t)}</div>`).join('');
+  if(g.gap<1.05)v.push(['v-bad',`✕ Hook block ${f1(g.gap)} m below the sheave — two-blocking risk. Hoist down or boom up.`]);
+  if(S.d.type!='same'&&g.off>10)v.push(['v-warn',`! Hook is not over the set-down area — slew ${f1(g.off,0)}° to ${f1(g.brg,0)}°.`]);
+  const wd=num(w.wind),wm=num(w.windMax),hs=num(w.hs),hm=num(w.hsMax);
+  if(isFinite(wd)&&isFinite(wm))v.push(wd<=wm?['v-ok',`✓ Wind ${f1(wd)} kn within limit ${f1(wm)} kn.`]:['v-bad',`✕ Wind ${f1(wd)} kn is over the ${f1(wm)} kn limit — stop lifting.`]);
+  if(isFinite(hs)&&isFinite(hm))v.push(hs<=hm?['v-ok',`✓ Sea Hs ${f1(hs)} m within limit ${f1(hm)} m.`]:['v-bad',`✕ Sea Hs ${f1(hs)} m is over the ${f1(hm)} m limit — stop lifting.`]);
+  $('verdicts').innerHTML=v.map(([k,t])=>`<div class="verdict ${k}">${esc(t)}</div>`).join('');
   $('fR').hidden=c.mode!='radius';$('fA').hidden=c.mode!='angle';
+  if(document.activeElement!==$('j_boom'))$('j_boom').value=g.th;
+  if(document.activeElement!==$('j_slew'))$('j_slew').value=g.slew;
+  $('j_hoist').max=Math.max(1,g.liftMax).toFixed(1);if(document.activeElement!==$('j_hoist'))$('j_hoist').value=g.lift;
 }
 
+/* ---------- crane controls ---------- */
+function toAngle(){if(S.c.mode!='angle'){S.c.ang=f1(geo().th,2);S.c.mode='angle'}}
+function step(k){const c=S.c,g=geo();
+  if(k=='boom+'||k=='boom-'){toAngle();c.ang=f1(clamp((num(c.ang)||0)+(k=='boom+'?.3:-.3),g.amin,g.amax),2)}
+  else if(k=='hoist+'||k=='hoist-'){c.lift=f1(clamp((num(c.lift)||0)+(k=='hoist+'?.15:-.15),0,g.liftMax),2)}
+  else if(k=='slew+'||k=='slew-'){c.slew=String(((num(c.slew)||0)+(k=='slew+'?1:-1)+360)%360)}
+  syncInputs();redraw();queueSave();
+}
+document.querySelectorAll('[data-hold]').forEach(b=>{let t=null,dly=null;const stop=()=>{clearTimeout(dly);clearInterval(t);t=dly=null;holding=false};
+  b.addEventListener('pointerdown',e=>{e.preventDefault();holding=true;step(b.dataset.hold);dly=setTimeout(()=>{t=setInterval(()=>step(b.dataset.hold),50)},300)});
+  ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,stop));
+  b.addEventListener('keydown',e=>{if(e.key=='Enter'||e.key==' '){e.preventDefault();step(b.dataset.hold)}})});
+$('j_boom').addEventListener('input',e=>{toAngle();S.c.ang=e.target.value;syncInputs();redraw();queueSave()});
+$('j_hoist').addEventListener('input',e=>{S.c.lift=e.target.value;redraw();queueSave()});
+$('j_slew').addEventListener('input',e=>{S.c.slew=e.target.value;redraw();queueSave()});
+function syncInputs(){['c.ang','c.R','c.mode'].forEach(k=>document.querySelectorAll(`[data-k="${k}"]`).forEach(el=>{const v=get(k);if(el.type=='radio')el.checked=v==el.value;else if(document.activeElement!==el)el.value=v??''}))}
+
 /* ---------- form binding ---------- */
-function fill(){document.querySelectorAll('[data-k]').forEach(el=>{const v=get(el.dataset.k);if(el.type=='radio')el.checked=v==el.value;else el.value=v??''});renderGear()}
+let cht='aux';
+function fill(){document.querySelectorAll('[data-k]').forEach(el=>{const v=get(el.dataset.k);if(el.type=='radio')el.checked=v==el.value;else el.value=v??''});renderGear();renderChart()}
 function renderGear(){$('gear').innerHTML=S.gear.map((g,i)=>`<div class="gear"><input type="text" data-gi="${i}" data-gk="t" value="${esc(g.t)}" aria-label="Gear label"><select data-gi="${i}" data-gk="a" aria-label="Points to">${Object.entries(ANCH).map(([k,v])=>`<option value="${k}"${g.a==k?' selected':''}>${v}</option>`).join('')}</select><button class="ibtn" data-gdel="${i}" aria-label="Delete">✕</button></div>`).join('')}
+const chartArr=()=>cht=='aux'?S.c.chartAux:S.c.chartMain;
+function renderChart(){const a=chartArr();$('chart').innerHTML=a.length?a.map((r,i)=>`<div class="chr"><input type="number" inputmode="decimal" step="any" data-ci="${i}" data-ck="r" value="${esc(r.r)}" aria-label="Radius"><input type="number" inputmode="decimal" step="any" data-ci="${i}" data-ck="cap" value="${esc(r.cap)}" aria-label="Capacity"><button class="ibtn" data-cdel="${i}" aria-label="Delete">✕</button></div>`).join(''):`<p class="hint">No rows yet — the ${cht} block SWL is used at every radius.</p>`}
+document.querySelectorAll('[name=cht]').forEach(r=>r.addEventListener('change',()=>{cht=r.value;renderChart()}));
+$('bRow').onclick=()=>{chartArr().push({r:'',cap:''});renderChart()};
 let raf=0;const redraw=()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(draw)};
 function onEdit(e){const el=e.target;
   if(el.dataset.k){set(el.dataset.k,el.value);if(el.dataset.k=='l.style')ensureConv();if(el.dataset.k=='c.mode'){const g=geo();S.c.R=f1(g.R);S.c.ang=f1(g.th);fill()}}
   else if(el.dataset.gi){S.gear[+el.dataset.gi][el.dataset.gk]=el.value}
+  else if(el.dataset.ci){chartArr()[+el.dataset.ci][el.dataset.ck]=el.value}
   else return;
   redraw();queueSave();
 }
 document.addEventListener('input',onEdit);document.addEventListener('change',onEdit);
-document.addEventListener('click',e=>{const d=e.target.closest('[data-gdel]');if(d){S.gear.splice(+d.dataset.gdel,1);S.lab={...S.lab};renderGear();redraw();queueSave()}});
+document.addEventListener('click',e=>{const d=e.target.closest('[data-gdel]'),cd=e.target.closest('[data-cdel]');
+  if(d){S.gear.splice(+d.dataset.gdel,1);renderGear();redraw();queueSave()}
+  if(cd){chartArr().splice(+cd.dataset.cdel,1);renderChart();redraw();queueSave()}});
 $('bGear').onclick=()=>{S.gear.push({t:'',a:'hook'});renderGear();redraw()};
 
 /* ---------- dragging on the drawing ---------- */
 const svgPt=e=>{const sv=$('svg'),p=sv.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(sv.getScreenCTM().inverse())};
+const pxPerM=()=>{const r=$('svg').querySelector('[data-drag=load] rect,[data-drag=load] image');return r?(+r.getAttribute('width'))/geo().lL:20};
 let drag=null;
 $('svg').addEventListener('pointerdown',e=>{const t=e.target.closest('[data-drag]');if(!t)return;e.preventDefault();
-  const p=svgPt(e),k=t.dataset.drag;
-  if(k=='load'){const g=geo();drag={k,x:p.x,R0:g.R,s:pxPerM()}}
-  else{const key=k.slice(4);drag={k,key,x:p.x,y:p.y,o:CUR[key]?{...CUR[key]}:null}}
+  const p=svgPt(e),k=t.dataset.drag,g=geo();
+  if(k=='load')drag={k,x:p.x,R0:g.R,s:pxPerM()};
+  else if(k.startsWith('pt'))drag={k,x:p.x,i0:num(S.l.inset)||0,s:pxPerM()*g.k,side:k=='pt0'?1:-1};
+  else{const key=k.slice(4);drag={k,key,x:p.x,y:p.y,o:CUR[key]?{...CUR[key]}:{dx:0,dy:0}}}
   $('svg').style.touchAction='none'});
 window.addEventListener('pointermove',e=>{if(!drag)return;e.preventDefault();const p=svgPt(e);
-  if(drag.k=='load'){S.c.mode='radius';S.c.R=f1(drag.R0+(p.x-drag.x)/drag.s);}
-  else{const base=drag.o||CUR[drag.key]||{dx:0,dy:0};S.lab[drag.key]={dx:base.dx+p.x-drag.x,dy:base.dy+p.y-drag.y}}
+  if(drag.k=='load'){S.c.mode='radius';S.c.R=f1(drag.R0+(p.x-drag.x)/drag.s);syncInputs()}
+  else if(drag.k.startsWith('pt')){const L0=Math.max(.2,num(S.l.L)||1);S.l.inset=f1(clamp(drag.i0+drag.side*(p.x-drag.x)/drag.s,0,L0/2-.05),2)}
+  else S.lab[drag.key]={dx:drag.o.dx+p.x-drag.x,dy:drag.o.dy+p.y-drag.y};
   redraw()},{passive:false});
 window.addEventListener('pointerup',()=>{if(!drag)return;drag=null;$('svg').style.touchAction='pan-y';fill();queueSave()});
-function pxPerM(){const svg=$('svg');const g=geo();const r=svg.querySelector('[data-drag=load] rect,[data-drag=load] image');return r?(+r.getAttribute('width'))/g.lL:20}
 
 /* ---------- photo → sketch conversion ---------- */
 function toSketch(src,mode){return new Promise((res,rej)=>{const im=new Image();im.onerror=rej;im.onload=()=>{
   const w=im.width,h=im.height,cv=document.createElement('canvas');cv.width=w;cv.height=h;const x=cv.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);x.drawImage(im,0,0);
-  const id=x.getImageData(0,0,w,h),d=id.data,n=w*h,g=new Float32Array(n);
-  for(let i=0;i<n;i++)g[i]=.299*d[i*4]+.587*d[i*4+1]+.114*d[i*4+2];
+  const id=x.getImageData(0,0,w,h),d=id.data,n=w*h,gr=new Float32Array(n);
+  for(let i=0;i<n;i++)gr[i]=.299*d[i*4]+.587*d[i*4+1]+.114*d[i*4+2];
   const blur=(a,r)=>{const t=new Float32Array(n),o=new Float32Array(n),k=2*r+1;
-    for(let y=0;y<h;y++){let s=0;const row=y*w;for(let i=-r;i<=r;i++)s+=a[row+Math.min(w-1,Math.max(0,i))];for(let xx=0;xx<w;xx++){t[row+xx]=s/k;s+=a[row+Math.min(w-1,xx+r+1)]-a[row+Math.max(0,xx-r)]}}
-    for(let xx=0;xx<w;xx++){let s=0;for(let i=-r;i<=r;i++)s+=t[Math.min(h-1,Math.max(0,i))*w+xx];for(let y=0;y<h;y++){o[y*w+xx]=s/k;s+=t[Math.min(h-1,y+r+1)*w+xx]-t[Math.max(0,y-r)*w+xx]}}return o};
+    for(let y=0;y<h;y++){let s=0;const row=y*w;for(let i=-r;i<=r;i++)s+=a[row+clamp(i,0,w-1)];for(let xx=0;xx<w;xx++){t[row+xx]=s/k;s+=a[row+Math.min(w-1,xx+r+1)]-a[row+Math.max(0,xx-r)]}}
+    for(let xx=0;xx<w;xx++){let s=0;for(let i=-r;i<=r;i++)s+=t[clamp(i,0,h-1)*w+xx];for(let y=0;y<h;y++){o[y*w+xx]=s/k;s+=t[Math.min(h-1,y+r+1)*w+xx]-t[Math.max(0,y-r)*w+xx]}}return o};
   const out=new Float32Array(n);
-  if(mode=='pencil'){const r=Math.max(2,Math.round(Math.max(w,h)/160)),inv=new Float32Array(n);for(let i=0;i<n;i++)inv[i]=255-g[i];const b=blur(blur(inv,r),r);
-    for(let i=0;i<n;i++){let v=g[i]*255/Math.max(1,255-b[i]);v=Math.min(255,v);out[i]=Math.max(0,255-(255-v)*1.6)}}
-  else{const s=blur(g,Math.max(1,Math.round(Math.max(w,h)/700)));let mx=1;const m=new Float32Array(n);
-    for(let y=1;y<h-1;y++)for(let xx=1;xx<w-1;xx++){const i=y*w+xx,gx=s[i-w+1]+2*s[i+1]+s[i+w+1]-s[i-w-1]-2*s[i-1]-s[i+w-1],gy=s[i+w-1]+2*s[i+w]+s[i+w+1]-s[i-w-1]-2*s[i-w]-s[i-w+1];m[i]=Math.hypot(gx,gy);if(m[i]>mx)mx=m[i]}
-    const sorted=Array.from(m.filter((v,i)=>i%7==0)).sort((a,b)=>a-b),hi=sorted[Math.floor(sorted.length*.97)]||mx;
+  if(mode=='pencil'){const r=Math.max(2,Math.round(Math.max(w,h)/160)),inv=new Float32Array(n);for(let i=0;i<n;i++)inv[i]=255-gr[i];const b=blur(blur(inv,r),r);
+    for(let i=0;i<n;i++){const v=Math.min(255,gr[i]*255/Math.max(1,255-b[i]));out[i]=Math.max(0,255-(255-v)*1.6)}}
+  else{const sm=blur(gr,Math.max(1,Math.round(Math.max(w,h)/700)));const m=new Float32Array(n);
+    for(let y=1;y<h-1;y++)for(let xx=1;xx<w-1;xx++){const i=y*w+xx,gx=sm[i-w+1]+2*sm[i+1]+sm[i+w+1]-sm[i-w-1]-2*sm[i-1]-sm[i+w-1],gy=sm[i+w-1]+2*sm[i+w]+sm[i+w+1]-sm[i-w-1]-2*sm[i-w]-sm[i-w+1];m[i]=Math.hypot(gx,gy)}
+    const sorted=Array.from(m.filter((v,i)=>i%7==0)).sort((a,b)=>a-b),hi=sorted[Math.floor(sorted.length*.97)]||1;
     for(let i=0;i<n;i++){const v=Math.min(1,m[i]/hi);out[i]=255-Math.pow(v,.8)*255*(v>.18?1:v/.18)}}
   for(let i=0;i<n;i++){d[i*4]=d[i*4+1]=d[i*4+2]=out[i];d[i*4+3]=255}
   x.putImageData(id,0,0);res(cv.toDataURL('image/jpeg',.88))};im.src=src})}
-
 async function ensureConv(){const l=S.l;if(!l.img||l.style=='orig')return;l.conv=l.conv||{};if(l.conv[l.style])return;
   toast('Converting picture…');try{l.conv[l.style]=await toSketch(l.img,l.style);redraw();queueSave()}catch(e){toast('Could not convert this picture.')}}
-/* ---------- picture ---------- */
 $('bImg').onclick=()=>{$('fImg').value='';$('fImg').click()};
 $('bImgClr').onclick=()=>{S.l.img='';S.l.conv={};redraw();queueSave()};
-$('fImg').addEventListener('change',e=>{const file=e.target.files[0];if(!file)return;const fr=new FileReader();fr.onload=()=>{const im=new Image();im.onload=()=>{const max=1200,k=Math.min(1,max/Math.max(im.width,im.height)),cv=document.createElement('canvas');cv.width=Math.round(im.width*k);cv.height=Math.round(im.height*k);const x=cv.getContext('2d');x.drawImage(im,0,0,cv.width,cv.height);S.l.img=cv.toDataURL('image/png');S.l.conv={};ensureConv();redraw();queueSave();toast('Load picture inserted')};im.src=fr.result};fr.readAsDataURL(file)});
+$('fImg').addEventListener('change',e=>{const file=e.target.files[0];if(!file)return;const fr=new FileReader();fr.onload=()=>{const im=new Image();im.onload=()=>{const max=1200,k=Math.min(1,max/Math.max(im.width,im.height)),cv=document.createElement('canvas');cv.width=Math.round(im.width*k);cv.height=Math.round(im.height*k);cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);S.l.img=cv.toDataURL('image/png');S.l.conv={};ensureConv();redraw();queueSave();toast('Load picture inserted')};im.src=fr.result};fr.readAsDataURL(file)});
 
 /* ---------- storage (this device) ---------- */
 function idb(name,store){return new Promise((res,rej)=>{const r=indexedDB.open(name,1);r.onupgradeneeded=()=>r.result.createObjectStore(store);r.onsuccess=()=>res(r.result);r.onerror=rej})}
 async function kv(op,key,val,name='cranesketch',store='kv'){const d=await idb(name,store);return new Promise((res,rej)=>{const t=d.transaction(store,op=='get'||op=='keys'?'readonly':'readwrite'),os=t.objectStore(store);
   const q=op=='get'?os.get(key):op=='put'?os.put(val,key):op=='del'?os.delete(key):os.getAllKeys();q.onsuccess=()=>res(q.result);q.onerror=rej})}
 let sv;function queueSave(){clearTimeout(sv);sv=setTimeout(()=>kv('put','__current',JSON.stringify(S)).catch(()=>{}),500)}
-const merge=d=>{const b=DEF();for(const k of ['tb','c','d','l'])b[k]=Object.assign(b[k],d[k]||{});b.name=d.name||b.name;b.gear=Array.isArray(d.gear)?d.gear:b.gear;b.lab=d.lab||{};return b};
+const merge=d=>{const b=DEF();for(const k of ['tb','c','d','w','l'])b[k]=Object.assign(b[k],d[k]||{});b.name=d.name||b.name;b.gear=Array.isArray(d.gear)?d.gear:b.gear;b.lab=d.lab||{};
+  if(!Array.isArray(b.c.chartAux))b.c.chartAux=[];if(!Array.isArray(b.c.chartMain))b.c.chartMain=[];return b};
 $('bSave').onclick=async()=>{const n=(S.name||'Untitled').trim();try{await kv('put','s:'+n,JSON.stringify(S));toast('Saved “'+n+'” on this device')}catch(e){toast('Could not save here.')}};
 $('bList').onclick=async()=>{let keys=[];try{keys=(await kv('keys')).filter(k=>String(k).startsWith('s:'))}catch(e){}
   $('list').innerHTML=keys.length?keys.map(k=>`<div class="li"><span>${esc(k.slice(2))}</span><button class="btn pri" data-open="${esc(k)}">Open</button><button class="btn" data-ldel="${esc(k)}">Delete</button></div>`).join(''):'<p class="hint">No saved sketches yet. Tap Save to keep one.</p>';$('mList').classList.add('on')};
 $('list').addEventListener('click',async e=>{const o=e.target.closest('[data-open]'),d=e.target.closest('[data-ldel]');
-  if(o){const v=await kv('get',o.dataset.open);S=merge(JSON.parse(v));fill();draw();queueSave();$('mList').classList.remove('on');toast('Opened '+S.name)}
+  if(o){const v=await kv('get',o.dataset.open);S=merge(JSON.parse(v));fill();draw();fillProf(S.c.vessel);queueSave();$('mList').classList.remove('on');toast('Opened '+S.name)}
   if(d){await kv('del',d.dataset.ldel);$('bList').onclick()}});
 $('lClose').onclick=()=>$('mList').classList.remove('on');
 let aOk=null;const ask=(t,ok)=>{$('aTxt').textContent=t;aOk=ok;$('mAsk').classList.add('on')};
 $('aNo').onclick=()=>$('mAsk').classList.remove('on');$('aYes').onclick=()=>{$('mAsk').classList.remove('on');aOk&&aOk()};
-$('bNew').onclick=()=>ask('Start a new sketch? Tap Save first if you want to keep this one.',()=>{S=DEF();fill();draw();queueSave()});
+$('bNew').onclick=()=>ask('Start a new sketch? Tap Save first if you want to keep this one.',()=>{S=DEF();fill();draw();fillProf(S.c.vessel);queueSave()});
 
 /* ---------- vessel crane profiles ---------- */
-const PK=['vessel','type','on','auxSWL','mainSWL','chart','L','ped','foot','ext','sea'];
-const BUILTIN={'M.V. GO Aliya':{vessel:'M.V. GO Aliya',type:'Offshore pedestal lattice-boom crane',on:'vessel',auxSWL:'10',mainSWL:'80',chart:'',L:'46',ped:'8',foot:'1.5',ext:'2',sea:'4'}};
+const PK=['vessel','type','on','auxSWL','mainSWL','fallsAux','fallsMain','chartAux','chartMain','angMin','angMax','L','ped','foot','ext','sea'];
+const BUILTIN={'M.V. GO Aliya':{vessel:'M.V. GO Aliya',type:'Offshore pedestal lattice-boom crane',on:'vessel',auxSWL:'10',mainSWL:'80',fallsAux:'1',fallsMain:'4',chartAux:[{r:'44',cap:'10'}],chartMain:[],angMin:'10',angMax:'80',L:'46',ped:'10',foot:'1.5',ext:'2',sea:'3'}};
 async function profiles(){let saved={};try{const ks=(await kv('keys')).filter(k=>String(k).startsWith('p:'));for(const k of ks)saved[k.slice(2)]=JSON.parse(await kv('get',k))}catch(e){}return{...BUILTIN,...saved}}
-async function fillProf(sel){const P=await profiles();$('prof').innerHTML='<option value="">— choose —</option>'+Object.keys(P).map(n=>`<option${n==sel?' selected':''}>${esc(n)}</option>`).join('');return P}
-$('prof').addEventListener('change',async e=>{const n=e.target.value;if(!n)return;const P=await profiles();if(!P[n])return;PK.forEach(k=>{if(P[n][k]!=null)S.c[k]=P[n][k]});fill();draw();queueSave();toast('Loaded '+n)});
+async function fillProf(sel){const P=await profiles();$('prof').innerHTML='<option value="">— choose —</option>'+Object.keys(P).map(n=>`<option${n==sel?' selected':''}>${esc(n)}</option>`).join('')}
+$('prof').addEventListener('change',async e=>{const n=e.target.value;if(!n)return;const P=await profiles();if(!P[n])return;PK.forEach(k=>{if(P[n][k]!=null)S.c[k]=JSON.parse(JSON.stringify(P[n][k]))});fill();draw();queueSave();toast('Loaded '+n)});
 $('pSave').onclick=async()=>{const n=(S.c.vessel||'').trim();if(!n){toast('Type the vessel / installation name first.');return}const o={};PK.forEach(k=>o[k]=S.c[k]);try{await kv('put','p:'+n,JSON.stringify(o));await fillProf(n);toast('Saved crane for '+n)}catch(e){toast('Could not save here.')}};
-$('pDel').onclick=async()=>{const n=$('prof').value;if(!n)return;if(BUILTIN[n]&&!(await kv('get','p:'+n).catch(()=>null))){toast('The built-in GO Aliya crane cannot be deleted, but you can change and save over it.');return}ask('Delete saved crane “'+n+'”?',async()=>{await kv('del','p:'+n);await fillProf('');toast('Deleted '+n)})};
+$('pDel').onclick=async()=>{const n=$('prof').value;if(!n)return;const own=await kv('get','p:'+n).catch(()=>null);if(BUILTIN[n]&&!own){toast('The built-in GO Aliya crane cannot be deleted, but you can change and save over it.');return}ask('Delete saved crane “'+n+'”?',async()=>{await kv('del','p:'+n);await fillProf('');toast('Deleted '+n)})};
 
-/* ---------- PNG export ---------- */
+/* ---------- PNG export + send to lift plan ---------- */
 let tt;function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2600)}
 function png(){return new Promise((res,rej)=>{const svg=$('svg').cloneNode(true);svg.setAttribute('width',W);svg.setAttribute('height',DH+TB);
   const url='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(new XMLSerializer().serializeToString(svg));
@@ -457,19 +560,17 @@ async function saveFile(name,blob){
   const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);toast('Saved '+name)}
 const fname=()=>('LiftSketch_'+(S.tb.lpno||S.name||'sketch')).replace(/[^\w.-]+/g,'_')+'.png';
 $('bPng').onclick=async()=>{try{const {blob}=await png();await saveFile(fname(),blob)}catch(e){toast('Could not make the picture.')}};
-
-/* ---------- send to lift plan (same site) ---------- */
 $('bToPlan').onclick=async()=>{try{const {data}=await png();
   let st={};try{const v=await kv('get','cur',null,'liftplan','kv');if(v)st=JSON.parse(v)}catch(e){}
-  st.sk=Array.isArray(st.sk)?st.sk:[];
-  const empty=st.sk.findIndex(r=>!r.img);const item={img:data,cap:'Sketch '+((empty<0?st.sk.length:empty)+1)+': '+(S.tb.title||'Crane lift elevation'),note:''};
+  st.sk=Array.isArray(st.sk)?st.sk:[];const empty=st.sk.findIndex(r=>!r.img);
+  const item={img:data,cap:'Sketch '+((empty<0?st.sk.length:empty)+1)+': '+(S.tb.title||'Crane lift elevation'),note:''};
   if(empty<0)st.sk.push(item);else st.sk[empty]={...st.sk[empty],img:data};
   await kv('put','cur',JSON.stringify(st),'liftplan','kv');toast('Added to lift plan section 9 — open the lift plan to see it')}catch(e){toast('Could not add to the lift plan.')}};
 if(window.claude){$('bToPlan').hidden=true;$('backLink').hidden=true}
 
 /* ---------- start ---------- */
 fill();draw();fillProf(S.c.vessel);
-(async()=>{try{const v=await kv('get','__current');if(v){S=merge(JSON.parse(v));fill();draw()}}catch(e){}})();
+(async()=>{try{const v=await kv('get','__current');if(v){S=merge(JSON.parse(v));fill();draw();fillProf(S.c.vessel)}}catch(e){}})();
 }
 </script>
 </body>
